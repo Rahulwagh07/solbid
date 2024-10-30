@@ -14,13 +14,13 @@ export function GameStatistics({ gameData } : {gameData: GameData}) {
 
   return (
     <>
-    <Card className="bg-slate-900 text-slate-200 border-2 border-slate-700 pb-16">
+    <Card className="text-slate-200 bg-slate-800 border-slate-700 pb-16">
       <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-700">
           {/* Winner Section */}
           <div className="p-6">
             <CardHeader className="px-0">
-              <CardTitle className="flex items-center text-slate-100">
+              <CardTitle className="flex items-center text-slate-100 text-lg sm:text-xl">
                 <Trophy className="mr-2 text-green-500" /> Winner
               </CardTitle>
             </CardHeader>
@@ -31,7 +31,7 @@ export function GameStatistics({ gameData } : {gameData: GameData}) {
                   <AvatarFallback>{winner.user.name.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-2xl font-bold">{winner.user.name}</p>
+                  <p className="sm:text-lg font-bold">{winner.user.name}</p>
                   <p className="text-slate-300 flex items-center">
                     Winning Price: 
                     <span className="ml-1 flex items-center">
@@ -46,7 +46,7 @@ export function GameStatistics({ gameData } : {gameData: GameData}) {
           {/* Finisher Section */}
           <div className="p-6">
             <CardHeader className="px-0">
-              <CardTitle className="flex items-center text-slate-100">
+              <CardTitle className="flex items-center text-slate-100 text-lg sm:text-xl" >
                 <Award className="mr-2 text-red-600" /> 
                 {
                   gameData.totalBids > 5 ? "Creator" : " Finisher"
@@ -55,13 +55,13 @@ export function GameStatistics({ gameData } : {gameData: GameData}) {
             </CardHeader>
             {finisher && (
               <div className="flex items-center space-x-4">
-                <Avatar className="h-16 w-16 border-2 border-slate-600">
+                <Avatar className="h-12 w-12 sm:h-16 sm:w-16 border-2 border-slate-600">
                   <AvatarImage src={finisher.user.imageUrl || undefined} />
                   <AvatarFallback>{finisher.user.name.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-2xl font-bold">{finisher.user.name}</p>
-                  <p className="text-slate-300 flex items-center">
+                  <p className="sm:text-lg font-bold">{finisher.user.name}</p>
+                  <p className="text-slate-300 flex items-center text-sm">
                     Royalty Earned: 
                     <span className="ml-1 flex items-center">
                       {finisher.royaltyEarned}
@@ -76,7 +76,7 @@ export function GameStatistics({ gameData } : {gameData: GameData}) {
       </CardContent>
     </Card>
 
-    <Card className="bg-slate-900 text-slate-200 border-b-[0px] border-[0.5px] rounded-sm border-slate-700 -mt-6 pb-12">
+    <Card className="bg-slate-800 text-slate-200 border-b-[0px] border-[0.5px] rounded-sm border-slate-700 -mt-6 pb-12">
       <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-700">
           <div className="p-6">

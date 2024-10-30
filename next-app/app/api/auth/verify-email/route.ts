@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     })
 
     if (!otpRecord) {
-      return NextResponse.json({ message: 'Invalid or expired OTP' }, { status: 400 })
+      return NextResponse.json({ message: 'Invalid OTP' }, { status: 401  })
     }
     
     return NextResponse.json({ message: 'OTP verified successfully' }, { status: 200 })

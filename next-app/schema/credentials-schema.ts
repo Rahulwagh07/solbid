@@ -16,7 +16,7 @@ export const passwordSchema = z
 export const otpSchema = z
   .string({ required_error: "OTP is required" })
   .min(6, { message: "OTP must be at least 6 characters" })
-  .max(8, { message: "OTP is max 8 characters" });
+  .max(6, { message: "OTP is max 6 characters" });
 
 export const signupSchema = z.object({
   email: emailSchema,

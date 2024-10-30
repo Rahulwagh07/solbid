@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2 } from "lucide-react"
-import toast from "react-hot-toast"
+import { useToast } from "@/hooks/use-toast"
 import axios from "axios"
 import { forgotPasswordSchema, ForgotPasswordFormData, validateForm } from "@/schema/credentials-schema"
 
@@ -26,6 +26,7 @@ export default function ForgotPasswordModal() {
   const [errors, setErrors] = useState<Partial<ForgotPasswordFormData>>({})
   const [step, setStep] = useState<"email" | "otp" | "newPassword">("email")
   const router = useRouter()
+  const { toast } = useToast()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -34,56 +35,65 @@ export default function ForgotPasswordModal() {
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    const { isValid, errors } = validateForm(forgotPasswordSchema, formData)
+    event.preventDefault();
+  
+    const { isValid, errors } = validateForm(forgotPasswordSchema, formData);
     if (!isValid) {
-      setErrors(errors)
-      return
+      setErrors(errors);
+      return;
     }
-    setIsLoading(true)
-
+  
+    setIsLoading(true);
+  
     try {
       if (step === "email") {
-        const res = await axios.post("/api/auth/forgot-password", { email: formData.email })
-        if (res.status === 200) {
-          toast.success("OTP sent to your email")
-          setStep("otp")
-        }
+        await axios.post("/api/auth/forgot-password", { email: formData.email });
+        toast({
+          description: "OTP sent to your email",
+        });
+        setStep("otp");
       } else if (step === "otp") {
-        const res = await axios.get("/api/auth/verify-email", {
+        await axios.get("/api/auth/verify-email", {
           params: {
             email: formData.email,
             otp: formData.otp,
           },
-        })
-        if (res.status === 200) {
-          toast.success("OTP verified successfully")
-          setStep("newPassword")
-        } else {
-          toast.error("Invalid OTP")
-        }
+        });
+        toast({
+          description: "OTP verified successfully",
+        });
+        setStep("newPassword");
       } else if (step === "newPassword") {
-        const res = await axios.post("/api/auth/reset-password", {
+          await axios.post("/api/auth/reset-password", {
           email: formData.email,
           password: formData.password,
-        })
-        if (res.status === 200) {
-          toast.success("Password reset successfully! Login With new password")
-          router.push("?modal=login")
-        } else {
-          toast.error("Failed to reset password")
-        }
+        });
+        toast({
+          description: "Password reset successfully! Login with your new password",
+        });
+        router.push("?modal=login");
       }
-    } catch{
-      toast.error("An unexpected error occurred")
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        toast({
+          variant: "destructive",
+          description: error.response.data.message || "An unexpected error occurred",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Something went wrong. Please try again.",
+        });
+      }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push('/')}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-[0.5px] border-slate-600">
         <DialogHeader>
           <DialogTitle>Reset Your Password</DialogTitle>
           <DialogDescription>
@@ -97,6 +107,7 @@ export default function ForgotPasswordModal() {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
+                className='bg-gray-800 border-slate-700'
                 id="email"
                 name="email"
                 type="email"
@@ -112,6 +123,7 @@ export default function ForgotPasswordModal() {
             <div className="space-y-2">
               <Label htmlFor="otp">One-Time Password</Label>
               <Input
+                className='bg-gray-800 border-slate-700'
                 id="otp"
                 name="otp"
                 type="text"
@@ -128,6 +140,7 @@ export default function ForgotPasswordModal() {
               <div className="space-y-2">
                 <Label htmlFor="password">New Password</Label>
                 <Input
+                  className='bg-gray-800 border-slate-700'
                   id="password"
                   name="password"
                   type="password"
@@ -141,6 +154,7 @@ export default function ForgotPasswordModal() {
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <Input
+                  className='bg-gray-800 border-slate-700'
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"

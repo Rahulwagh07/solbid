@@ -177,10 +177,10 @@ export async function PUT(req: Request) {
     await prisma.game.update({
       where: {
         gameId: gameId.toString(),
-        lastBidTime: new Date(),
       },
       data: {
         gameEnded: true,
+        lastBidTime: new Date(),
       },
     });
  

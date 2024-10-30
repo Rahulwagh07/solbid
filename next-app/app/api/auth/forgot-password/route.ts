@@ -25,7 +25,7 @@ export async function POST(req:Request) {
     })
 
     await sendVerificationEmail(email, otp)
-    return NextResponse.json({message: 'OTP sent successfully'}, {status : 200})
+    return NextResponse.json({message: 'OTP sent to your email'}, {status : 200})
 
   } catch (error) {
     console.log(error)

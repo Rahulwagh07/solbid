@@ -5,14 +5,13 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
 import { formatDistanceToNow } from 'date-fns'
 import { useSocket } from '@/context/socket-context'
 import CreateGame from './CreateGame'
 import jwt from 'jsonwebtoken'
 import { GameData } from '@/types/game'
 import { DollarSign } from 'lucide-react'
+import { LoadingSkeleton } from '../skelton/loading-skelton'
 
 interface Game {
   id: number
@@ -29,7 +28,7 @@ export default function AllGames() {
   const [games, setGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-  const { socket, sendMessage, connectionError, user, setUser } = useSocket()
+  const { socket, sendMessage, user, setUser } = useSocket()
 
   const addOrUpdateGame = useCallback((newGame: Game) => {
     setGames(prevGames => {
@@ -81,14 +80,8 @@ export default function AllGames() {
         socket.removeEventListener('message', handleWebSocketMessage);
       }
     }
-  }, [socket, addOrUpdateGame, user, router, setUser])
+  }, [socket, addOrUpdateGame, user, setUser])
 
-  useEffect(() => {
-    if (!user) {
-      router.push("/?modal=login")
-      return
-    }
-  }, [])
   const fetchGames = async () => {
     setIsLoading(true)
     try {
@@ -114,40 +107,35 @@ export default function AllGames() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className='flex justify-between mb-6'>
-        <h1 className="text-3xl font-bold">Active Games</h1>
-        <CreateGame onCreateGame={handleCreateGame} />
-      </div>
+    <>
       {isLoading ? (
-        <div className="space-y-4 min-h-screen">
-          {[...Array(6)].map((_, index) => (
-            <Skeleton key={index} className="h-12 w-full bg-slate-300" />
-          ))}
-        </div>
+        <LoadingSkeleton/>
       ) : (
+        <div className="w-full mx-auto py-8 mt-8 px-2">
+        <div className='flex justify-between mx-auto mb-6'>
+        <h1 className="text-xl sm:text-3xl font-bold">Active Games</h1>
+        <CreateGame onCreateGame={handleCreateGame} />
+      </div> 
         <Table>
           <TableHeader>
-            <TableRow>
-              {/* <TableHead>Game ID</TableHead> */}
-              <TableHead>Initial Bid</TableHead>
-              <TableHead>Highest Bid</TableHead>
-              <TableHead>Total Prize</TableHead>
-              <TableHead>Total Bids</TableHead>
-              <TableHead>Last Bid</TableHead>
-              <TableHead>Status</TableHead>
+            <TableRow className='border-b text-slate-300 border-slate-700'>
+              <TableHead className='text-slate-300'>Initial Bid</TableHead>
+              <TableHead className='text-slate-300'>Highest Bid</TableHead>
+              <TableHead className='text-slate-300'>Total Prize</TableHead>
+              <TableHead className='text-slate-300'>Total Bids</TableHead>
+              <TableHead className='text-slate-300'>Last Bid</TableHead>
+              <TableHead className='text-slate-300'>Status</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody >
             {games.map((game) => (
               <TableRow key={game.id} onClick={() => handleOnClick(game.gameEnded, game.id)}
-                className='cursor-pointer hover:bg-slate-900'>
-                {/* <TableCell> {game.gameId}</TableCell> */}
-                <TableCell className='flex items-center'> <DollarSign size={12}/>{game.initialBidAmount}</TableCell>
-                <TableCell> <span className='flex items-center'><DollarSign size={12}/> {game.highestBid}</span>  </TableCell>
-                <TableCell  > <span className='flex items-center'><DollarSign size={12}/> {game.prizePool}</span></TableCell>
+                className='cursor-pointer text-sm bg-gray-700/20 border-b border-slate-700 hover:bg-slate-700 h-12 sm:h-16'>
+                <TableCell ><span className='flex items-center'><DollarSign size={16}/> {game.initialBidAmount}</span></TableCell>
+                <TableCell> <span className='flex items-center'><DollarSign size={16}/> {game.highestBid}</span>  </TableCell>
+                <TableCell  > <span className='flex items-center text-green-500'><DollarSign size={16}/> {game.prizePool}</span></TableCell>
                 <TableCell>{game.totalBids}</TableCell>
-                <TableCell>{formatDistanceToNow(new Date(game.lastBidTime), { addSuffix: true })}</TableCell>
+                <TableCell className='text-sm'>{formatDistanceToNow(new Date(game.lastBidTime), { addSuffix: true })}</TableCell>
                 <TableCell>
                   <Badge variant={game.gameEnded ? "secondary" : "default"}>
                     {game.gameEnded ? "Ended" : "Active"}
@@ -157,7 +145,8 @@ export default function AllGames() {
             ))}
           </TableBody>
         </Table>
+        </div>
       )}
-    </div>
+    </>
   )
 }

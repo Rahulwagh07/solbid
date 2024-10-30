@@ -1,155 +1,154 @@
-'use client';
+'use client'
 
 import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { placeBid} from '@/solana/bid'
-import toast from 'react-hot-toast'
+import { placeBid } from '@/solana/bid'
 import axios from 'axios'
-import { LAMPORTS_PER_SOL} from '@solana/web3.js'
 import { useSocket } from '@/context/socket-context'
 import { GameData } from '@/types/game'
-import { useWallet } from '@solana/wallet-adapter-react';
-import { CONNECTION } from '@/lib/constant';
-import { getAllPlayersAndBidsForGame, getGameData } from '@/solana/game';
+import { useWallet } from '@solana/wallet-adapter-react'
+import { CONNECTION } from '@/lib/constant'
+import { getAllPlayersAndBidsForGame, getGameData } from '@/solana/game'
+import { useToast } from '@/hooks/use-toast'
+import { useTransaction } from '@/hooks/use-tranaction'
+import { validateBidAmount } from '@/lib/helper'
+import { Loader } from 'lucide-react'
+ 
 
 interface PlaceBidModalProps {
   gameId: number
   bidCount: number
   currBid: number
-  onPlaceBid: (gameData: GameData) => void;
+  onPlaceBid: (gameData: GameData) => void
 }
 
 export default function PlaceBid({ gameId, bidCount, currBid, onPlaceBid }: PlaceBidModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [bidAmount, setBidAmount] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
-  const { publicKey, connected, signTransaction} = useWallet()
+  const { publicKey } = useWallet()
   const { sendMessage } = useSocket()
+  const { toast } = useToast()
+  const { status, execute, resetStatus } = useTransaction(CONNECTION)
+  const [loading, setLoading] = useState(false)
 
-  const validateBidAmount = (amount: number) => {
-    if (isNaN(amount)) {
-      return 'Please enter a valid number'
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    if (!publicKey) {
+      toast({
+        title: "Wallet Connection Required",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      })
+      setLoading(false)
+      return
     }
-    if (amount <= 0) {
-      return 'Bid amount must be greater than 0'
+  
+    try {
+      let pdas = { playerPda: "", bidPda: "" };
+      const txid = await execute(async () => {
+        const { 
+          instructions, 
+          totalCost, 
+          playerPda, 
+          bidPda 
+        } = await placeBid(publicKey, gameId, parseFloat(bidAmount), Number(bidCount) + 1)
+        pdas = {
+          playerPda: playerPda.toString(),
+          bidPda: bidPda.toString(),
+        };;
+        return { instructions, totalCost }
+      })
+
+      if (txid) {
+        const game = await getGameData(gameId)
+        if (game?.game_ended) {
+          const playerData = await getAllPlayersAndBidsForGame(gameId)
+          const res = await axios.put("/api/bid", {
+            gameId: gameId,
+            creatorPublicKey: publicKey.toString(),
+            playerPda: pdas.playerPda,
+            bidPda: pdas.bidPda,
+            playerData: playerData,
+            amount: parseFloat(bidAmount),
+            bidCount: Number(bidCount) + 1
+          })
+          if (res.status === 200) {
+            toast({
+              title: "Game Ended",
+              description: "You just came after the winner.",
+              variant: "default",
+            })
+            const gameData: GameData = res.data.gameData
+            sendMessage('place-bid', gameData)
+            onPlaceBid(gameData)
+            setIsOpen(false)
+            return
+          }
+        } else {
+          const res = await axios.post("/api/bid", {
+            gameId: gameId,
+            amount: parseFloat(bidAmount),
+            creatorPublicKey: publicKey.toString(),
+            playerPda: pdas.playerPda,
+            bidPda: pdas.bidPda,
+            bidCount: Number(bidCount) + 1,
+          })
+          if (res.status === 200) {
+            const gameData: GameData = res.data.gameData
+            sendMessage('place-bid', gameData)
+            onPlaceBid(gameData)
+          }
+          setIsOpen(false)
+          setBidAmount('')
+        }
+        setValidationError(null)
+      }
+    } catch (error) {
+      resetState()
+      toast({
+        title: "Bid Failed",
+        description: "An error occurred while placing your bid. Please try again.",
+        variant: "destructive",
+      })
+      console.error('Failed to place bid:', error)
+    } finally{
+      resetState()
     }
-    if (amount < currBid * 2) {
-      return `Bid amount must be greater than ${currBid * 2} USDC (double the current bid)`
-    }
-    return null
   }
 
-  const handleBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setBidAmount(value)
     if (value) {
-      const error = validateBidAmount(parseFloat(value))
+      const error = validateBidAmount(parseFloat(value), currBid)
       setValidationError(error)
     } else {
       setValidationError(null)
     }
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!connected || !publicKey || !signTransaction) {
-      toast.error('Please connect your wallet first')
-      return
-    }
-    const bidAmountNumber = parseFloat(bidAmount)
-    
-    const error = validateBidAmount(bidAmountNumber)
-    if (error) {
-      setValidationError(error)
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      const { 
-        transaction, 
-        latestBlockhash, totalCost, 
-        playerPda, bidPda 
-      } = await placeBid(publicKey, gameId, bidAmountNumber,  Number(bidCount) + 1)
-      
-      const balance = await CONNECTION.getBalance(publicKey)
-      if (balance < totalCost) {
-        toast.error(`Insufficient balance. You need at least ${totalCost / LAMPORTS_PER_SOL} SOL`)
-        setIsLoading(false)
-        return
-      }
-      const signedTransaction = await signTransaction(transaction)
-      const txid = await CONNECTION.sendRawTransaction(signedTransaction.serialize());
-      
-      const confirmation = await CONNECTION.confirmTransaction({
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-        signature: txid,
-      }, 'confirmed')
-
-      console.log("Txid", txid)
-      if (confirmation.value.err) {
-        throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`)
-      }
-
-      const game  = await getGameData(gameId)
-      if(game?.game_ended){
-        const playerData = await getAllPlayersAndBidsForGame(gameId);
-        const res = await axios.put("/api/bid", {
-          gameId: gameId,
-          creatorPublicKey: publicKey.toString(),
-          playerPda: playerPda.toString(),
-          bidPda: bidPda.toString(),
-          playerData: playerData,
-          amount: bidAmountNumber,
-          bidCount: Number(bidCount) + 1
-        });
-        if(res.status === 200){
-          toast.success("Game is Ended..You just came after winner.")
-          const gameData: GameData = res.data.gameData;
-          sendMessage('place-bid', gameData)
-          onPlaceBid(gameData)
-          setIsOpen(false)
-          return;
-        }
-      } else{
-        toast.success('Bid placed successfully!')
-        const res = await axios.post("/api/bid", {
-          gameId: gameId,
-          amount: bidAmountNumber,
-          creatorPublicKey: publicKey.toString(),
-          playerPda: playerPda.toString(),
-          bidPda: bidPda.toString(),
-          bidCount: Number(bidCount) + 1,
-        });
-        if(res.status === 200){
-          const gameData: GameData = res.data.gameData;
-          sendMessage('place-bid', gameData)
-          onPlaceBid(gameData)
-        }
-        setIsOpen(false)
-        setBidAmount('')
-      }
-      setValidationError(null)
-      
-    } catch (error) {
-      toast.error(`Failed to place bid`)
-      console.error('Failed to place bid:', error)
-    } finally {
-      setIsLoading(false)
-    }
+  const resetState = () => {
+    setIsOpen(false)
+    setLoading(false)
+    setBidAmount('')
+    resetStatus()
+    setValidationError(null)
   }
 
+  const handleModalClose = (open: boolean) => {
+    setIsOpen(open)
+    if (!open) resetState()  
+  }
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleModalClose}>
       <DialogTrigger asChild>
         <Button>Place Bid</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-[0.5px] border-slate-600">
         <DialogHeader>
           <DialogTitle>Place a Bid</DialogTitle>
         </DialogHeader>
@@ -164,24 +163,25 @@ export default function PlaceBid({ gameId, bidCount, currBid, onPlaceBid }: Plac
               step="0.01"
               min="0"
               value={bidAmount}
-              onChange={handleBidChange}
+              onChange={handleInputChange}
               placeholder={`Minimum bid: ${(currBid * 2).toFixed(2)} $`}
               required
-              className={validationError ? 'border-red-500' : ''}
+              className={validationError ? 'border-red-500 bg-gray-800' : 'bg-gray-800 border-slate-700'}
             />
             {validationError && (
               <p className="text-red-500 text-sm">{validationError}</p>
             )}
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               Current bid: {currBid.toFixed(2)} $
             </p>
           </div>
           <Button 
             type="submit" 
             className="w-full" 
-            disabled={isLoading || !!validationError || !bidAmount}
-          >
-            {isLoading ? 'Placing Bid...' : 'Place Bid'}
+            disabled={loading || validationError !== null}
+          > 
+            {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+            {status.state === 'idle' ? 'Place Bid' : status.message}
           </Button>
         </form>
       </DialogContent>

@@ -11,28 +11,26 @@ import { PROGRAM_ID, CONNECTION} from '@/lib/constant';
 import { getBidPda, getGamePda, getPlayerPda } from './pda';
 import { GameState, PlayerState } from './state';
 
-
 export const createGame = async (publicKey: PublicKey, gameId: number, bidAmount: number) => {
-  const gameIdBuffer = Buffer.alloc(8);
-  gameIdBuffer.writeBigUInt64LE(BigInt(gameId));
+  const gameIdBuffer = Buffer.alloc(8)
+  gameIdBuffer.writeBigUInt64LE(BigInt(gameId))
 
-  const bidCountBuffer = Buffer.alloc(8);  
-  bidCountBuffer.writeBigUInt64LE(BigInt(1));  
+  const bidCountBuffer = Buffer.alloc(8)
+  bidCountBuffer.writeBigUInt64LE(BigInt(1))
 
   const initialBidLamports = convertUsdcToLamports(bidAmount)
-  const initialBidAmountBuffer = Buffer.alloc(8);
-
+  const initialBidAmountBuffer = Buffer.alloc(8)
   initialBidAmountBuffer.writeBigUInt64LE(BigInt(initialBidLamports))
 
   const instructionData = Buffer.concat([
-    Buffer.from([0]),  
+    Buffer.from([0]),
     gameIdBuffer,
     initialBidAmountBuffer,
-  ]);
+  ])
 
-  const gamePda = getGamePda(new BN(gameId));
+  const gamePda = getGamePda(new BN(gameId))
   const playerPda = getPlayerPda(new BN(gameId), publicKey, new BN(1))
-  const bidPda  = getBidPda(new BN(gameId), new BN(1))
+  const bidPda = getBidPda(new BN(gameId), new BN(1))
 
   const createGameIx = new TransactionInstruction({
     keys: [
@@ -44,20 +42,9 @@ export const createGame = async (publicKey: PublicKey, gameId: number, bidAmount
     ],
     programId: PROGRAM_ID,
     data: instructionData,
-  });
+  })
 
-  const latestBlockhash = await CONNECTION.getLatestBlockhash('confirmed');
-  const transaction = new Transaction();
-  transaction.add(createGameIx);
-  transaction.recentBlockhash = latestBlockhash.blockhash;
-  transaction.feePayer = publicKey;
-
-  let fees = await transaction.getEstimatedFee(CONNECTION);
-  if (fees === null) {
-    fees = 50000000
-  }
-  const totalCost = fees + initialBidLamports;
-  return { transaction, latestBlockhash, totalCost, gamePda, playerPda, bidPda };
+  return { instructions: [createGameIx], totalCost: initialBidLamports, gamePda, playerPda, bidPda }
 }
 
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { getSession, signIn, useSession} from "next-auth/react"
+import { getSession, signIn} from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,16 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2 } from "lucide-react"
-import toast from "react-hot-toast"
+import { Loader, Loader2 } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import Link from "next/link"
 import { loginSchema, LoginFormData, validateForm } from "@/schema/credentials-schema"
 import { useSocket } from "@/context/socket-context"
- 
+import { useToast } from "@/hooks/use-toast"
 
 export default function LoginModal() {
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, _setIsOpen] = useState(true)
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<LoginFormData>({
@@ -32,6 +31,7 @@ export default function LoginModal() {
   const [errors, setErrors] = useState<Partial<LoginFormData>>({})
   const router = useRouter()
   const { setUser } = useSocket()
+  const {toast} = useToast()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -56,20 +56,38 @@ export default function LoginModal() {
       })
       if (result?.error) {
         if (result.error === "401") {
-          toast.error("Incorrect password")
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "Incorrect password",
+          })
         } else if (result.error === "404") {
-          toast.error("User does not exist, please sign up")
-        } else {
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "User does not exist, please sign up",
+          })
+          router.push("/?modal=signup")
+          return
+        }  
+        else {
           throw new Error(result.error)
         }
       } else {
-        toast.success("Login Successful")
         const session = await getSession();
         setUser(session?.user || null);
-        router.push('/home')
+        router.push("/home")
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        })
       }
-    } catch{
-      toast.error("Login Failed")
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Something went wrong. Please try again.",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -78,11 +96,16 @@ export default function LoginModal() {
   const handleGoogleLogin = async () => {
     setIsLoadingGoogle(true)
     try {
-      await signIn("google", { callbackUrl: '/home' })
+      await signIn("google", { callbackUrl: '/home', redirect: true })
       const session = await getSession();
       setUser(session?.user || null);
-    } catch{
-      toast.error("Login Failed")
+      router.push("/home")
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "An error occurred during Google login",
+      })
     } finally {
       setIsLoadingGoogle(false)
     }
@@ -90,7 +113,7 @@ export default function LoginModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push('/')}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-[0.5px] border-slate-600">
         <DialogHeader>
           <DialogTitle>Login to your account</DialogTitle>
           <DialogDescription>
@@ -101,6 +124,7 @@ export default function LoginModal() {
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
+              className='bg-gray-800 border-slate-700'
               id="email"
               name="email"
               type="email"
@@ -114,6 +138,7 @@ export default function LoginModal() {
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <Input
+              className='bg-gray-800 border-slate-700'
               id="password"
               name="password"
               type="password"
@@ -133,7 +158,7 @@ export default function LoginModal() {
             </Link>
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
             Login
           </Button>
         </form>
@@ -142,7 +167,7 @@ export default function LoginModal() {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
+            <span className="px-2 text-muted-foreground">
               Or continue with
             </span>
           </div>
@@ -151,7 +176,7 @@ export default function LoginModal() {
           variant="outline"
           type="button"
           disabled={isLoadingGoogle || isLoading}
-          className="w-full"
+          className="w-full dark:bg-gray-900 dark:hover:bg-gray-950 dark:border-slate-700"
           onClick={handleGoogleLogin}
         >
           {isLoadingGoogle ? (

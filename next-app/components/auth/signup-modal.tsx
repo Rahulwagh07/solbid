@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Loader2 } from "lucide-react"
-import toast from "react-hot-toast"
+import { useToast } from "@/hooks/use-toast"
 import { FcGoogle } from "react-icons/fc"
 import Link from "next/link"
 import axios from "axios"
@@ -23,7 +23,7 @@ import { useSocket } from "@/context/socket-context"
 
 export default function SignupModal() {
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false)
-  const [isOpen, setIsOpen] = useState(true)
+  const [isOpen, _setIsOpen] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState<SignupFormData>({
     email: "",
@@ -34,6 +34,7 @@ export default function SignupModal() {
   const [showOtpInput, setShowOtpInput] = useState(false)
   const router = useRouter()
   const {setUser} = useSocket()
+  const {toast} = useToast()
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -54,13 +55,21 @@ export default function SignupModal() {
       if (!showOtpInput) {
         const res = await axios.post("/api/auth/verify-email", { email: formData.email })
         if (res.status === 200) {
-          toast.success("User exists! Please login")
+          toast({
+            title: "User exists",
+            description: "Please login instead",
+            variant: "default",
+          })
           router.push("?modal=login")
           return
         }
         if (res.status === 201) {
           setShowOtpInput(true)
-          toast.success("OTP sent to your email")
+          toast({
+            title: "OTP Sent",
+            description: "Please check your email",
+            variant: "default",
+          })
           return
         }
       } else {
@@ -79,19 +88,31 @@ export default function SignupModal() {
             isSignUp: "true",
           })
           if (result?.error === "409") {
-            toast.error("Email already exists. Please login")
+            toast({
+              title: "Email already exists",
+              description: "Please login instead",
+              variant: "destructive",
+            })
             router.push("?modal=login")
             return
           }
-          toast.success("Signed up successfully")
+          toast({
+            title: "Signup Successful",
+            description: "Welcome to our platform!",
+            variant: "default",
+          })
           router.push("/home")
           return
         } else {
           throw new Error("OTP verification failed")
         }
       }
-    } catch{
-      toast.error("Signup Failed")
+    } catch {
+      toast({
+        title: "Signup Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -104,7 +125,11 @@ export default function SignupModal() {
       const session = await getSession();
       setUser(session?.user || null);
     } catch {
-      toast.error("Signup Failed")
+      toast({
+        title: "Signup Failed",
+        description: "An error occurred during Google signup",
+        variant: "destructive",
+      })
     } finally {
       setIsLoadingGoogle(false)
     }
@@ -112,7 +137,7 @@ export default function SignupModal() {
 
   return (
     <Dialog  open={isOpen} onOpenChange={() => router.push('/')}>
-      <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] bg-gray-800 border-[0.5px] border-slate-600">
         <DialogHeader>
           <DialogTitle>Create an account</DialogTitle>
           <DialogDescription>
@@ -127,6 +152,7 @@ export default function SignupModal() {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
+                  className='bg-gray-800 border-slate-700'
                   id="email"
                   name="email"
                   type="email"
@@ -140,6 +166,7 @@ export default function SignupModal() {
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
+                  className='bg-gray-800 border-slate-700'
                   id="name"
                   name="name"
                   placeholder="Enter username"
@@ -152,6 +179,7 @@ export default function SignupModal() {
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
+                  className='bg-gray-800 border-slate-700'
                   id="password"
                   name="password"
                   type="password"
@@ -167,6 +195,7 @@ export default function SignupModal() {
             <div className="space-y-2">
               <Label htmlFor="otp">OTP</Label>
               <Input
+                className='bg-gray-800 border-slate-700'
                 id="otp"
                 name="otp"
                 type="text"
@@ -195,7 +224,7 @@ export default function SignupModal() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="px-2 text-muted-foreground">
                   Or continue with
                 </span>
               </div>
@@ -204,7 +233,7 @@ export default function SignupModal() {
               variant="outline"
               type="button"
               disabled={isLoadingGoogle || isLoading}
-              className="w-full"
+              className="w-full dark:bg-gray-900 dark:hover:bg-gray-950 dark:border-slate-700"
               onClick={handleGoogleSignup}
             >
               {isLoadingGoogle ? (

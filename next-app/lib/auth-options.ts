@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
           } else {
             // Sign In
             if (!user || !user.password) {
-              throw new Error("Invalid credentials");
+              throw new Error("404");
             }
            
             const passwordVerification = await bcrypt.compare(passwordValidation.data, user.password);
@@ -103,6 +103,7 @@ export const authOptions: NextAuthOptions = {
               id: user.id.toString(),
               email: user.email,
               name: user.name,
+              image:user.imageUrl,
             };
           }
         } catch (error) {

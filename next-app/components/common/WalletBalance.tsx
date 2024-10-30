@@ -3,11 +3,9 @@
 import { useState, useEffect } from 'react'
 import { LAMPORTS_PER_SOL } from '@solana/web3.js'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { Button } from "@/components/ui/button"
 import { Wallet } from "lucide-react" 
 import { CONNECTION } from '@/lib/constant'
  
-
 export default function WalletBalance() {
   const { publicKey, connected } = useWallet()
   const [balance, setBalance] = useState<number | null>(null)

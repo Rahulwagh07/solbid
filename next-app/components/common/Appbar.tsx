@@ -1,24 +1,23 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "@/components/ui/button"
-import {  Menu, X } from 'lucide-react'
-import { useRouter} from 'next/navigation'
+import { LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import WalletBalance from './WalletBalance'
-import { CiLogout } from "react-icons/ci";
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import "../../styles/wallet.css"
 
-
 export default function Appbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [scrollY, setScrollY] = useState(0)
   const router = useRouter()
   const session = useSession()
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (typeof window !== "undefined"){
@@ -28,13 +27,26 @@ export default function Appbar() {
     }
   }, [])
 
-  const navbarBackground = scrollY > 20 ? "bg-slate-900/90 backdrop-blur-md" : " bg-slate-900/30"
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const navbarBackground = scrollY > 20 ? "bg-slate-900/90 backdrop-blur-md" : "bg-slate-900/30"
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarBackground}`}>
-      <nav className="container w-full md:w-6/12 mx-auto  py-3 flex justify-between items-center">
+      <nav className="w-full xl:w-9/12 mx-auto py-3 flex justify-between items-center pl-4 md:px-4 lg:px-8 xl:px-0">
         <motion.div 
-          className="text-2xl   font-bold font-serif bg-clip-text cursor-pointer text-transparent text-white"
+          className="text-2xl font-bold font-serif bg-clip-text cursor-pointer text-transparent text-white"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
@@ -43,7 +55,7 @@ export default function Appbar() {
           SolBid
         </motion.div>
         <div className="md:hidden">
-          <Button variant="ghost" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle menu">
+          <Button variant={"ghost"} onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </Button>
         </div>
@@ -59,48 +71,72 @@ export default function Appbar() {
             {session.data?.user ? (
               <li className='flex flex-col md:flex-row gap-8 items-center'>
                 <Link href={"/home"}
-                 className='block py-2 px-3 text-lg text-white   rounded hover:bg-gray-100 
+                 className='block py-2 px-3 text-sm sm:text-lg text-white rounded hover:bg-gray-100 
                  md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
                   md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent'>
                 Games
                 </Link>
-                <WalletBalance/>
-                <WalletMultiButton  className="wallet-button"/>
-                <div className='flex items-center justify-center'>
-                <CiLogout size={32} 
-                className='text-white rotate-90 font-semibold cursor-pointer'
-                onClick={() =>
-                    signOut({
-                      callbackUrl: "/",
-                    })
-                  }>
-                </CiLogout>
+                 
+                <div className='hidden md:block relative' ref={dropdownRef}>
+                  <Avatar 
+                    className="cursor-pointer"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    <AvatarImage src={session?.data?.user?.image || ""} alt="ProfileIcon" />
+                    <AvatarFallback>{session?.data.user.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-40 rounded-md bg-white dark:bg-slate-900 border dark:border-slate-800 ring-1 ring-black ring-opacity-5">
+                      <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <Link href="/dashboard" className="flex items-center px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </Link>
+                        <button
+                          onClick={() => signOut({ callbackUrl: "/" })}
+                          className="flex items-center w-full px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Log out
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <Link href={"/dashboard"}>
-                <Avatar>
-                  <AvatarImage src="dddd" alt="@shadcn" />
-                  <AvatarFallback >{session?.data.user.name?.charAt(0)}</AvatarFallback>
-                </Avatar>
+                <div className='md:hidden flex items-center justify-center'>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="flex items-center py-2 px-3 text-sm sm:text-lg text-white rounded hover:bg-gray-100 
+                 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
+                  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </button>
+
+                </div>
+                <Link href={"/dashboard"} className='md:hidden'>
+                  <Avatar>
+                    <AvatarImage src={session?.data?.user?.image || ""} alt="ProfileIcon" />
+                    <AvatarFallback>{session?.data.user.name?.charAt(0)}</AvatarFallback>
+                  </Avatar>
                 </Link>
+                <WalletMultiButton className="wallet-button"/>
               </li>
             ) : (
               <>
-          
-                  <Link  href='/?modal=login'  
-                 className='block py-2 px-3 text-lg text-white font-serif rounded hover:bg-gray-100 
-                 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
-                  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent' >
-                    Login
-                  </Link>
-              
-               
-                  <Link  href='/?modal=signup' 
-                  className='block py-2 px-3 text-lg text-white   font-serif rounded hover:bg-gray-100 
+                <Link href='/?modal=login'  
+                  className='block py-2 px-3 text-lg text-white font-serif rounded hover:bg-gray-100 
                   md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
-                   md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent' >
-                    Signup
-                  </Link>
-              
+                  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent'>
+                  Login
+                </Link>
+                <Link href='/?modal=signup' 
+                  className='block py-2 px-3 text-lg text-white font-serif rounded hover:bg-gray-100 
+                  md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
+                  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent'>
+                  Signup
+                </Link>
               </>
             )}
             </motion.ul>

@@ -28,3 +28,16 @@ export const fetchCurrentGameId = async () => {
     console.error('Error fetching current game Id:', error);
   }
 };
+
+export const validateBidAmount = (amount: number, currBid:number) => {
+  if (isNaN(amount)) {
+    return 'Please enter a valid number'
+  }
+  if (amount <= 0) {
+    return 'Bid amount must be greater than 0'
+  }
+  if (amount < currBid * 2) {
+    return `Bid amount must be greater than ${currBid * 2} USDC (double the current bid)`
+  }
+  return null
+}
