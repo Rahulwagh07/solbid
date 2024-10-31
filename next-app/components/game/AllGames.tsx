@@ -12,6 +12,7 @@ import jwt from 'jsonwebtoken'
 import { GameData } from '@/types/game'
 import { DollarSign } from 'lucide-react'
 import { LoadingSkeleton } from '../skelton/loading-skelton'
+import CustomLoader from '../common/Loader'
 
 interface Game {
   id: number
@@ -109,7 +110,7 @@ export default function AllGames() {
   return (
     <>
       {isLoading ? (
-        <LoadingSkeleton/>
+          <CustomLoader styles="mx-auto -mt-80 sm:-mt-20"/> 
       ) : (
         <div className="w-full mx-auto py-8 mt-8 px-2">
         <div className='flex justify-between mx-auto mb-6'>
@@ -127,7 +128,7 @@ export default function AllGames() {
               <TableHead className='text-slate-300'>Status</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody >
+          <TableBody>
             {games.map((game) => (
               <TableRow key={game.id} onClick={() => handleOnClick(game.gameEnded, game.id)}
                 className='cursor-pointer text-sm bg-gray-700/20 border-b border-slate-700 hover:bg-slate-700 h-12 sm:h-16'>

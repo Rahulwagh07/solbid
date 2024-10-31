@@ -17,5 +17,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/gameid', '/api/game', '/api/bid'],
+  matcher: ['/api/gameid', '/api/pda', '/api/game', '/api/bid', '/api/dashboard', '/api/dashboard/profile'],
 };
+ 

@@ -122,10 +122,25 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, account, user }) {
+      // This runs only at initial login
       if (account && user) {
-        token.id = user.id;
-        token.provider = account.provider;
+        const foundUser = await prisma.user.findUnique({
+          where: { email: user.email as string },
+        });
+        if (foundUser) {
+          token.id = foundUser.id.toString(); // Save Prisma ID at login
+          token.provider = account.provider;
+        }
+      } else if (token.email) {
+        // Runs on every request to ensure `token.id` has Prisma `id`
+        const foundUser = await prisma.user.findUnique({
+          where: { email: token.email },
+        });
+        if (foundUser) {
+          token.id = foundUser.id.toString();
+        }
       }
+  
       return token;
     },
     async session({ session, token }: { session: Session, token: JWT }) {
