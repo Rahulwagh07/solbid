@@ -44,7 +44,7 @@ export default function Appbar() {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarBackground}`}>
-      <nav className="w-full xl:w-9/12 mx-auto py-3 flex justify-between items-center pl-4 md:px-4 lg:px-8 xl:px-0">
+      <nav className="w-full xl:w-11/12 mx-auto py-3 flex justify-between items-center pl-4 md:px-4 lg:px-8 xl:px-0">
         <motion.div 
           className="text-2xl font-bold font-serif bg-clip-text cursor-pointer text-transparent text-white"
           initial={{ opacity: 0, x: -20 }}
@@ -70,13 +70,15 @@ export default function Appbar() {
             >
             {session.data?.user ? (
               <li className='flex flex-col md:flex-row gap-8 items-center'>
-                <Link href={"/home"}
-                 className='block py-2 px-3 text-sm sm:text-lg text-white rounded hover:bg-gray-100 
-                 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
-                  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent'>
-                Games
+               <Link
+                  href="/home"
+                  className="bg-gradient-to-r from-indigo-700 to-purple-600 text-white  
+                   text-base font-semibold hover:bg
+                    rounded-sm px-4 py-3"
+                >
+                  Games
                 </Link>
-                 
+                <WalletMultiButton className="wallet-button"/>
                 <div className='hidden md:block relative' ref={dropdownRef}>
                   <Avatar 
                     className="cursor-pointer"
@@ -86,9 +88,9 @@ export default function Appbar() {
                     <AvatarFallback>{session?.data.user.name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-40 rounded-md bg-white dark:bg-slate-900 border dark:border-slate-800 ring-1 ring-black ring-opacity-5">
+                    <div className="absolute right-0 mt-2 w-40 rounded-md z-100 bg-white border border-slate-600 dark:bg-gray-800">
                       <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                        <Link href="/dashboard" className="flex items-center px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700">
+                        <Link onClick={(() => setIsDropdownOpen(false))} href="/dashboard" className="flex items-center px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700">
                           <LayoutDashboard className="mr-2 h-4 w-4" />
                           Dashboard
                         </Link>
@@ -121,7 +123,6 @@ export default function Appbar() {
                     <AvatarFallback>{session?.data.user.name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </Link>
-                <WalletMultiButton className="wallet-button"/>
               </li>
             ) : (
               <>

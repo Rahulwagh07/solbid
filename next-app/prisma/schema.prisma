@@ -71,7 +71,8 @@ model Bid {
   amount       Int                                  
   timestamp    DateTime                          
   playerId     Int       @unique                          
-  player       Player    @relation(fields: [playerId], references: [id])  
+  player       Player    @relation(fields: [playerId], references: [id]) 
+  txId         String? 
   createdAt    DateTime  @default(now())
 }
 
