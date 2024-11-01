@@ -14,6 +14,7 @@ import "../../styles/wallet.css"
 export default function Appbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [windowWidth, setWindowWidth] = useState<number>(typeof window !== "undefined" ? window.innerWidth : 0);
   const [scrollY, setScrollY] = useState(0)
   const router = useRouter()
   const session = useSession()
@@ -60,7 +61,7 @@ export default function Appbar() {
           </Button>
         </div>
         <AnimatePresence>
-          {(isMenuOpen || window.innerWidth > 768) && (
+          {(isMenuOpen || windowWidth  > 768) && (
             <motion.ul 
               className={`md:flex md:space-x-6 items-center ${isMenuOpen ? 'flex flex-col absolute top-full left-0 right-0 bg-slate-900/95 backdrop-blur-md p-4' : 'hidden'} md:relative md:p-0 md:bg-transparent`}
               initial={{ opacity: 0, y: -20 }}
@@ -72,8 +73,10 @@ export default function Appbar() {
               <li className='flex flex-col md:flex-row gap-8 items-center'>
                <Link
                   href="/home"
-                  className="bg-gradient-to-r from-indigo-700 to-purple-600 text-white  
-                   text-base font-semibold hover:bg
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{ background: "linear-gradient(90deg, rgba(81,45,168,1) 62%, rgba(49,46,129,1) 99%)" }}
+                  className="text-white  
+                   text-base font-semibold
                     rounded-sm px-4 py-3"
                 >
                   Games
@@ -88,15 +91,15 @@ export default function Appbar() {
                     <AvatarFallback>{session?.data.user.name?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-40 rounded-md z-100 bg-white border border-slate-600 dark:bg-gray-800">
+                    <div className="absolute right-0 mt-2 w-40 rounded-md z-100 bg-white border-slate-600 dark:bg-slate-700/50 border-[0.5px]">
                       <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                        <Link onClick={(() => setIsDropdownOpen(false))} href="/dashboard" className="flex items-center px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700">
+                        <Link onClick={(() => setIsDropdownOpen(false))} href="/dashboard" className="flex items-center px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-600">
                           <LayoutDashboard className="mr-2 h-4 w-4" />
                           Dashboard
                         </Link>
                         <button
                           onClick={() => signOut({ callbackUrl: "/" })}
-                          className="flex items-center w-full px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+                          className="flex items-center w-full px-4 py-2 text-sm dark:text-gray-200 text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-600"
                         >
                           <LogOut className="mr-2 h-4 w-4" />
                           Log out
@@ -117,7 +120,7 @@ export default function Appbar() {
                 </button>
 
                 </div>
-                <Link href={"/dashboard"} className='md:hidden'>
+                <Link href={"/dashboard"} className='md:hidden' onClick={() => setIsMenuOpen(false)}>
                   <Avatar>
                     <AvatarImage src={session?.data?.user?.image || ""} alt="ProfileIcon" />
                     <AvatarFallback>{session?.data.user.name?.charAt(0)}</AvatarFallback>
@@ -126,13 +129,13 @@ export default function Appbar() {
               </li>
             ) : (
               <>
-                <Link href='/?modal=login'  
+                <Link href='/?modal=login'  onClick={() => setIsMenuOpen(false)}
                   className='block py-2 px-3 text-lg text-white font-serif rounded hover:bg-gray-100 
                   md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
                   md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent'>
                   Login
                 </Link>
-                <Link href='/?modal=signup' 
+                <Link href='/?modal=signup' onClick={() => setIsMenuOpen(false)}
                   className='block py-2 px-3 text-lg text-white font-serif rounded hover:bg-gray-100 
                   md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white
                   md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent'>

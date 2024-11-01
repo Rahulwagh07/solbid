@@ -18,23 +18,25 @@ export async function POST(req: Request) {
     const username = formData.get('username') as string;
     const file = formData.get('file') as Blob;
      
-    if(!file || !username){
+    if(!file && !username){
       return NextResponse.json({ message: "Missing Required field" }, { status: 400 });
     }
-    const url = await UploadImageToCloudinary(formData);
     const updateData: { imageUrl?: string; name?: string } = {};
+    if(file){
+      const url = await UploadImageToCloudinary(formData);
+      updateData.imageUrl = url;
+    }
+
     if (username) {
       updateData.name = username;
     }
-    if(url){
-      updateData.imageUrl = url;
-    }
+    
     await prisma.user.update({
       where: { id: parseInt(userId) },
       data: updateData,
     });
 
-    return NextResponse.json({ message: "Image uploaded successfully"}, { status: 200 });
+    return NextResponse.json({ message: "Image uploaded successfully", url:updateData.imageUrl}, { status: 200 });
 
   } catch (error) {
     console.error("Profile image upload error", error);

@@ -9,6 +9,7 @@ export async function middleware(request: NextRequest) {
   }
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('userId', token.sub as string)
+   
   return NextResponse.next({
     request: {
       headers: requestHeaders,
@@ -17,6 +18,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/gameid', '/api/pda', '/api/game', '/api/bid', '/api/dashboard', '/api/dashboard/profile'],
+  matcher: ['/api/gameid', '/api/pda', '/api/game', '/api/bid', '/api/dashboard', '/api/profile'],
 };
  
