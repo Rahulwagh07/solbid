@@ -5,27 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { signupSchema } from "@/schema/credentials-schema";
 import prisma from "@/lib/db";
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      provider?: string;
-    }
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    provider?: string;
-    updated: boolean;
-  }
-}
-
+ 
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
