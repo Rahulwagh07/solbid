@@ -22,6 +22,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     provider?: string;
+    updated: boolean;
   }
 }
 
@@ -121,33 +122,49 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt"
   },
   callbacks: {
-    async jwt({ token, account, user }) {
-      // This runs only at initial login
+    async jwt({ token, account, trigger, user, session }) {
+      if (trigger === "update" && session?.user) {
+        token.name = session.user.name;
+        token.email = session.user.email;
+        token.id = session.user.id;
+        token.provider = session.user.provider;
+        token.updated = true;
+        return token;
+      }
+    
       if (account && user) {
-        const foundUser = await prisma.user.findUnique({
-          where: { email: user.email as string },
-        });
-        if (foundUser) {
-          token.id = foundUser.id.toString(); // Save Prisma ID at login
-          token.provider = account.provider;
-        }
-      } else if (token.email) {
-        // Runs on every request to ensure `token.id` has Prisma `id`
-        const foundUser = await prisma.user.findUnique({
-          where: { email: token.email },
-        });
-        if (foundUser) {
-          token.id = foundUser.id.toString();
+        if (account.provider !== "credentials") {
+          const foundUser = await prisma.user.findUnique({
+            where: { email: user.email as string },
+          });
+          if (foundUser) {
+            token.sub = foundUser.id.toString();
+            token.provider = account.provider;
+          }
+        } else {
+          token.id = user.id;
+          token.provider = "credentials";
         }
       }
-  
+    
       return token;
     },
-    async session({ session, token }: { session: Session, token: JWT }) {
+    async session({ session, token}: { session: Session, token: JWT}) {
       if (session.user) {
         session.user.id = token.id;
         session.user.provider = token.provider;
+        session.user.name = token.name ?? null;
+        session.user.email = token.email ?? null;
+  
+        if (token.updated) {
+          const user = await prisma.user.findUnique({
+            where: { email: token.email?.toString() },
+            select: { imageUrl: true },
+          });
+          session.user.image = user?.imageUrl ?? session.user.image;
+        }
       }
+ 
       return session;
     },
     async signIn({ account, profile }) {
