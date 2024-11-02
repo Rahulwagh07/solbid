@@ -1,71 +1,78 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { createGame } from '@/solana/game'
-import { fetchCurrentGameId } from '@/lib/helper'
-import axios from 'axios'
-import { useSocket } from '@/context/socket-context'
-import { GameData } from '@/types/game'
-import { useWallet } from '@solana/wallet-adapter-react'
-import { CONNECTION } from '@/lib/constant'
-import { useToast } from '@/hooks/use-toast'
-import { useTransaction } from '@/hooks/use-tranaction'
-import { Loader, Loader2 } from 'lucide-react'
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { createGame } from "@/solana/game";
+import { fetchCurrentGameId } from "@/lib/helper";
+import axios from "axios";
+import { useSocket } from "@/context/socket-context";
+import { GameData } from "@/types/game";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { CONNECTION } from "@/lib/constant";
+import { useToast } from "@/hooks/use-toast";
+import { useTransaction } from "@/hooks/use-tranaction";
+import { Loader } from "lucide-react";
 
 interface CreateGameProps {
   onCreateGame: (gameData: GameData) => void;
 }
 
 export default function CreateGame({ onCreateGame }: CreateGameProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [initialBidAmount, setInitialBidAmount] = useState('')
-  const { sendMessage } = useSocket()
-  const { publicKey } = useWallet()
-  const { toast } = useToast()
-  const { status, execute, resetStatus } = useTransaction(CONNECTION)
-  const [loading, setLoading] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const [initialBidAmount, setInitialBidAmount] = useState("");
+  const { sendMessage } = useSocket();
+  const { publicKey } = useWallet();
+  const { toast } = useToast();
+  const { status, execute, resetStatus } = useTransaction(CONNECTION);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     setLoading(true);
     if (!publicKey) {
       toast({
         title: "Wallet Connection Required",
         description: "Please connect your wallet first",
         variant: "destructive",
-      })
-      setLoading(false)
-      return
+      });
+      setLoading(false);
+      return;
     }
-    const bidAmount = parseFloat(initialBidAmount)
+    const bidAmount = parseFloat(initialBidAmount);
     if (isNaN(bidAmount) || bidAmount <= 0) {
       toast({
         title: "Invalid Bid Amount",
         description: "Please enter a valid bid amount",
         variant: "destructive",
-      })
-      setLoading(false)
-      return
+      });
+      setLoading(false);
+      return;
     }
 
     try {
-      const gameId: number = await fetchCurrentGameId()
+      const gameId: number = await fetchCurrentGameId();
       let pdas = { gamePda: "", playerPda: "", bidPda: "" };
-      const txid = await execute(async () => {
-        const { instructions, totalCost, gamePda, playerPda, bidPda } = await createGame(publicKey, gameId, bidAmount)
-        
+      const txId = await execute(async () => {
+        const { instructions, totalCost, gamePda, playerPda, bidPda } =
+          await createGame(publicKey, gameId, bidAmount);
+
         pdas = {
           gamePda: gamePda.toString(),
           playerPda: playerPda.toString(),
           bidPda: bidPda.toString(),
-        };;
-        return { instructions, totalCost }
-      })
+        };
+        return { instructions, totalCost };
+      });
 
-      if (txid) {
+      if (txId) {
         const gameData = {
           gameId: gameId,
           initialBidAmount: bidAmount,
@@ -73,38 +80,38 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
           gamePda: pdas.gamePda,
           playerPda: pdas.playerPda,
           bidPda: pdas.bidPda,
-        }
+          txId: txId,
+        };
 
-        const res = await axios.post("/api/game", gameData)
-        const createdGameData: GameData = res.data.gameData
+        const res = await axios.post("/api/game", gameData);
+        const createdGameData: GameData = res.data.gameData;
 
         if (res.status === 200) {
-          sendMessage('create-game', createdGameData)
-          onCreateGame(createdGameData)
+          sendMessage("create-game", createdGameData);
+          onCreateGame(createdGameData);
         }
-        setIsOpen(false)
+        setIsOpen(false);
       }
     } catch (error) {
-      resetState()
-      console.error('Failed to create game:', error)
+      resetState();
+      console.error("Failed to create game:", error);
+    } finally {
+      resetState();
     }
-    finally{
-      resetState()
-    }
-  }
+  };
 
   const resetState = () => {
-    setIsOpen(false)
-    setLoading(false)
-    setInitialBidAmount('')
-    resetStatus()
-  }
+    setIsOpen(false);
+    setLoading(false);
+    setInitialBidAmount("");
+    resetStatus();
+  };
 
   const handleModalClose = (open: boolean) => {
-    setIsOpen(open)
-    if (!open) resetState()  
-  }
- 
+    setIsOpen(open);
+    if (!open) resetState();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleModalClose}>
       <DialogTrigger asChild>
@@ -120,7 +127,7 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
               Initial Bid Amount (USDC)
             </label>
             <Input
-              className='bg-gray-800 border-slate-700'
+              className="bg-gray-800 border-slate-700"
               id="initialBidAmount"
               type="number"
               step="0.01"
@@ -132,10 +139,10 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-            {status.state === 'idle' ? 'Create Game' : status.message}
+            {status.state === "idle" ? "Create Game" : status.message}
           </Button>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

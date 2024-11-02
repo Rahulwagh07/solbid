@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const { gameId, initialBidAmount, creatorPublicKey, gamePda, playerPda, bidPda } = result.data;
+    const { gameId, initialBidAmount, creatorPublicKey, gamePda, playerPda, bidPda, txId } = result.data;
   
     const game = await prisma.game.create({
       data: {
@@ -51,6 +51,7 @@ export async function POST(req: Request) {
         amount: parseInt(initialBidAmount.toString()),
         timestamp: new Date(),
         playerId: player.id,
+        txId: txId,
       },
     });
  
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
       }
     });
 
-    const gameData = await prisma.game.findUnique({
+    await prisma.game.findUnique({
       where:{
         id: game.id,
       },
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
       }
     })
     
-    return NextResponse.json({ message: 'Game created successfully', gameData }, { status: 200 });
+    return NextResponse.json({ message: 'Game created successfully'}, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });

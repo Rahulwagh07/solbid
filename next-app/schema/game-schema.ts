@@ -1,7 +1,7 @@
 import { z } from "zod";
-import bs58 from "bs58";   
+import bs58 from "bs58";
 
- 
+
 const base58Validator = z
   .string()
   .refine((val) => {
@@ -13,7 +13,7 @@ const base58Validator = z
     }
   }, { message: "Invalid base58 string" });
 
- 
+
 export const gameSchema = z.object({
   gameId: z.number({ required_error: "Game ID is required" }).positive(),
   initialBidAmount: z
@@ -23,8 +23,9 @@ export const gameSchema = z.object({
   gamePda: base58Validator,
   playerPda: base58Validator,
   bidPda: base58Validator,
+  txId: z.string({ required_error: "Transaction id is required" }),
 });
- 
+
 export const bidSchema = z.object({
   gameId: z.number({ required_error: 'Game ID is required' }).positive(),
   bidPda: base58Validator,
@@ -32,13 +33,14 @@ export const bidSchema = z.object({
   playerPda: base58Validator,
   creatorPublicKey: base58Validator,
   bidCount: z.number({ required_error: 'BidCount is required' }).positive(),
+  txId: z.string({ required_error: "Transaction id is required" }),
   playerData: z.array(
     z.object({
-      playerId: z.number({ required_error: 'Player ID is required' }),   
-      total_bid_amount: z.number(),  
+      playerId: z.number({ required_error: 'Player ID is required' }),
+      total_bid_amount: z.number(),
       royalty_earned: z.number(),
       bid_count: z.number(),
-      safe: z.boolean(),  
+      safe: z.boolean(),
     })
   ),
 });

@@ -40,13 +40,11 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
     if (!socket && session.data?.user.id) {
       const ws = new WebSocket(process.env.NEXT_PUBLIC_WSS_URL as string);
       ws.onopen = () => {
-        console.log("ws connection established");
         setSocket(ws);
         setLoading(false);
       };
 
       ws.onclose = () => {
-        console.log("ws connection closed")
         setSocket(null);
         setLoading(false);
       };
@@ -58,7 +56,7 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
         setLoading(false);
       };
 
-     () => {
+      () => {
         ws.close();
       };
     }
@@ -80,7 +78,8 @@ export const SocketContextProvider = ({ children }: PropsWithChildren) => {
 };
 
 export const useSocket = () => {
-  const { socket, user, setUser, connectionError, loading } = useContext(SocketContext);
+  const { socket, user, setUser, connectionError, loading } =
+    useContext(SocketContext);
 
   const sendMessage = (type: string, data: { [key: string]: any }) => {
     socket?.send(

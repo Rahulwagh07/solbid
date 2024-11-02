@@ -25,7 +25,7 @@ export async function GET(req:Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    const totalBids = user.players.reduce((acc, player) => acc + player.bidCount, 0)
+    const totalBids = user.players.length
     const highestBid = Math.max(...user.players.map(player => player.totalBidAmount))
     const totalRoyalties = user.players.reduce((acc, player) => acc + player.royaltyEarned, 0)
     const totalAmount = user.players.reduce((acc, player) => acc + player.totalBidAmount, 0)

@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const { gameId, bidPda, amount, playerPda, creatorPublicKey, bidCount } = result.data;
+    const { gameId, bidPda, amount, playerPda, creatorPublicKey, bidCount, txId} = result.data;
 
     const game = await prisma.game.findUnique({
       where: { gameId:  gameId.toString() },
@@ -65,10 +65,11 @@ export async function POST(req: Request) {
         amount: amount,
         timestamp: new Date(),
         playerId: player.id,
+        txId: txId,
       },
     });
 
-    const gameData = await prisma.game.findUnique({
+    await prisma.game.findUnique({
       where:{
         id: updatedGame.id,
       },
@@ -94,7 +95,7 @@ export async function POST(req: Request) {
       }
     })
 
-    return NextResponse.json({ message: 'Game updated successfully', gameData }, { status: 200 });
+    return NextResponse.json({ message: 'Game updated successfully'}, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
@@ -164,7 +165,7 @@ export async function PUT(req: Request) {
       );
     }
  
-    const { gameId, amount, playerPda, creatorPublicKey, bidCount, playerData, bidPda } = result.data;
+    const { gameId, amount, playerPda, creatorPublicKey, bidCount, playerData, bidPda, txId } = result.data;
   
     const game = await prisma.game.findUnique({
       where: { gameId: gameId.toString() },
@@ -196,7 +197,6 @@ export async function PUT(req: Request) {
         }
       });
     }
-
     const player = await prisma.player.create({
       data: {
         playerPubkey: creatorPublicKey,
@@ -209,12 +209,23 @@ export async function PUT(req: Request) {
       },
     });
 
+    const winnerId = player.id - 1;
+    await prisma.player.update({
+      where:{
+        id: winnerId,
+      },
+      data: {
+        role: PlayerRole.WINNER,
+      }
+    })
+
     await prisma.bid.create({
       data: {
         pda: bidPda,
         amount: amount,
         timestamp: new Date(),
         playerId: player.id,
+        txId: txId,
       },
     });
 

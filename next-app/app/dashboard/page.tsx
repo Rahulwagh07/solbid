@@ -55,10 +55,10 @@ export default function Dashboard() {
               <>
                 <h2 className="text-lg sm:text-3xl font-bold mb-6">Hello, {session?.data?.user.name}</h2>
                 <div className="grid gap-6 grid-cols-1">
-                  <CardItem title="Total Bids Placed by you" value={data?.metrics.totalBids} icon={<Wallet className="h-4 w-4 text-slate-400" />} />
-                  <CardItem title="Total Amount" value={`$${data?.metrics.totalAmount}`} icon={<Trophy className="h-4 w-4 text-slate-400" />} />
-                  <CardItem title="Your Highest Bid" value={`$${data?.metrics.highestBid}`} icon={<ArrowUpRight className="h-4 w-4 text-slate-400" />} />
-                  <CardItem title="Total Royalties Earned" value={`$${data?.metrics.totalRoyalties}`} icon={<Trophy className="h-4 w-4 text-slate-400" />} />
+                  <CardItem title="Total Bids Placed by you" value={data?.metrics?.totalBids?? 0} icon={<Wallet className="h-4 w-4 text-slate-400" />} />
+                  <CardItem title="Total Amount" value={`$${data?.metrics?.totalAmount?? 0}`} icon={<Trophy className="h-4 w-4 text-slate-400" />} />
+                  <CardItem title="Your Highest Bid" value={`$${data?.metrics?.highestBid?? 0}`} icon={<ArrowUpRight className="h-4 w-4 text-slate-400" />} />
+                  <CardItem title="Total Royalties Earned" value={`$${data?.metrics?.totalRoyalties?? 0}`} icon={<Trophy className="h-4 w-4 text-slate-400" />} />
                 </div>
               </>
             )}
@@ -74,7 +74,7 @@ export default function Dashboard() {
   )
 }
 
-function CardItem({ title, value, icon }: { title: string, value: string | number | undefined, icon: React.ReactNode }) {
+function CardItem({ title, value, icon }: { title: string, value: number | string, icon: React.ReactNode }) {
   return (
     <Card className="border-slate-700/90 bg-slate-700/50">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

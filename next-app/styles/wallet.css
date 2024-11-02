@@ -1,6 +1,11 @@
-/*  
+ 
 .wallet-adapter-button, .wallet-adapter-button-trigger{
-  border: 1px solid #475569 !important;
+  border: 1px solid #334155 !important;
   color: white;
   background-color: #1e293b;
-} */
+  transition: all 0.2s ease-in-out !important;
+  padding: 0 24px;
+  border-radius: 5px !important;
+  height: 48px !important;
+  font-size: 16px;
+}

@@ -74,10 +74,9 @@ export default function Appbar() {
                <Link
                   href="/home"
                   onClick={() => setIsMenuOpen(false)}
-                  style={{ background: "linear-gradient(90deg, rgba(81,45,168,1) 62%, rgba(49,46,129,1) 99%)" }}
-                  className="text-white  
-                   text-base font-semibold
-                    rounded-sm px-4 py-3"
+                  className="text-white font-semibold rounded-[5px] px-6 py-2.5
+                    bg-slate-800 border border-slate-700 hover:bg-zinc-900/50
+                    "
                 >
                   Games
                 </Link>

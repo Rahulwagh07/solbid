@@ -34,8 +34,12 @@ export default function ProfileUpdate() {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const initialUsername = session?.user?.name;
+  const initialImage = session?.user?.image;
 
   useEffect(() => {
     if (session?.user) {
@@ -43,6 +47,17 @@ export default function ProfileUpdate() {
       setImagePreview(session.user.image || null);
     }
   }, [session]);
+
+  useEffect(() => {
+    const hasChanges =
+      username !== initialUsername || imagePreview !== initialImage;
+
+    if (initialImage !== session?.user.image) {
+      setHasUnsavedChanges(false);
+    } else {
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [username, imagePreview, session]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,7 +97,7 @@ export default function ProfileUpdate() {
           trigger: "update",
         };
         await update(updateData);
-
+        setHasUnsavedChanges(false);
         toast({
           title: "Profile updated",
           description: "Your profile has been successfully updated.",
@@ -98,7 +113,15 @@ export default function ProfileUpdate() {
       });
     } finally {
       setIsLoading(false);
+      setHasUnsavedChanges(false);
     }
+  };
+
+  const handleDiscardChanges = () => {
+    setUsername(session?.user.name || "");
+    setImagePreview(session?.user.image || null);
+    setImage(null);
+    setHasUnsavedChanges(false);
   };
 
   return (
@@ -142,8 +165,12 @@ export default function ProfileUpdate() {
             />
           </div>
         </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+        <CardFooter className="flex flex-col sm:flex-row items-center gap-2">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading || !hasUnsavedChanges}
+          >
             {isLoading ? (
               <>
                 <Loader className="mr-2 h-4 w-4 animate-spin" />
@@ -153,6 +180,16 @@ export default function ProfileUpdate() {
               "Save Changes"
             )}
           </Button>
+          {hasUnsavedChanges && (
+            <Button
+              type="button"
+              variant={"destructive"}
+              className="w-full"
+              onClick={handleDiscardChanges}
+            >
+              Discard Changes
+            </Button>
+          )}
         </CardFooter>
       </form>
     </Card>
