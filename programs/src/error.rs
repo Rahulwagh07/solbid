@@ -3,7 +3,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug, Copy, Clone)]
 pub enum BiddingError {
-  #[error("Initial bid amount must be at least 14 SOL")]
+  #[error("Initial bid amount must be at least 0.014 SOL")]
   InsufficientInitialBid,
   #[error("Invalid game account")]
   InvalidGameAccount,

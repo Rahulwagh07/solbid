@@ -1,12 +1,5 @@
 use solana_program::{
-  account_info::{next_account_info, AccountInfo},
-  entrypoint::ProgramResult,
-  pubkey::Pubkey,
-  program::invoke_signed,
-  program::invoke,
-  system_instruction,
-  program_error::ProgramError,
-  sysvar::{clock::Clock, rent::Rent, Sysvar},
+  account_info::{next_account_info, AccountInfo}, entrypoint::ProgramResult, program::{invoke, invoke_signed}, program_error::ProgramError, pubkey::Pubkey, system_instruction, sysvar::{clock::Clock, rent::Rent, Sysvar}
 };
 use borsh::BorshSerialize;
 use crate::state::{Bid, GameState, PlayerState, BID_ACCOUNT_SIZE, PLAYER_ACCOUNT_SIZE};
@@ -66,6 +59,7 @@ pub fn place_bid(
     new_bid_count, 
     program_id
   );
+
   if *new_player_account.key != new_player_pda {
     return Err(BiddingError::InvalidNewPlayerAccount.into());
   }
@@ -75,6 +69,7 @@ pub fn place_bid(
     new_bid_count, 
     program_id
   );
+  
   if *new_bid_account.key != new_bid_pda {
     return Err(BiddingError::InvalidNewBidAccount.into());
   }
@@ -169,32 +164,55 @@ pub fn end_game<'a, 'b: 'a>(
   let bid_history: Vec<Bid> = fetch_bid_history(program_id, game_state.game_id, game_state.total_bids, accounts)?;
 
   if bid_history.len() < 5 {
+   
     let total_amount = game_state.prize_pool;
     let platform_fee = total_amount * 10 / 100;
     let remaining_prize = total_amount - platform_fee;
 
     let last_bid = bid_history.last().ok_or(BiddingError::NoBidsFound)?;
-    let winner_account = find_account(&last_bid.bidder, accounts)?;
-
+   
+    let (winner_pda, _) = player_pda_seeds(
+      game_state.game_id,
+      &last_bid.bidder,  
+      game_state.total_bids,
+      program_id
+    );
+ 
+    let winner_account = find_account(&winner_pda, accounts)?;
+ 
     transfer_from_pda(game_account, platform_account, platform_fee)?;
 
     transfer_from_pda(game_account, winner_account, remaining_prize)?;
-
+    
+    let mut player_state =  deserialize_player_state(&winner_account.data.borrow())?;
+    player_state.safe = true; 
+    player_state.royalty_earned += remaining_prize; 
+    player_state.serialize(&mut &mut winner_account.data.borrow_mut()[..])?;
+ 
     game_state.game_ended = true;
     game_state.serialize(&mut &mut game_account.data.borrow_mut()[..])?;
-
+ 
     return Ok(());
   }
-
+ 
   let last_5_bids: Vec<u64> = bid_history.iter().rev().take(5).map(|bid| bid.amount).collect();
   let platform_fee = last_5_bids.iter().sum::<u64>() * game_state.platform_fee_percentage / 100;
 
   let royalty_amount = bid_history[bid_history.len() - 4].amount;
-
+ 
   cal_royalties(&bid_history, royalty_amount, program_id, game_id, game_state.total_bids, game_account, accounts)?;
-   
+ 
   let last_bid = bid_history.last().ok_or(BiddingError::NoWinnerFound)?;
-  let winner_account = find_account(&last_bid.bidder, accounts)?;
+ 
+  let (winner_pda, _) = player_pda_seeds(
+    game_state.game_id,
+    &last_bid.bidder,  
+    game_state.total_bids,
+    program_id
+  );
+ 
+  let winner_account = find_account(&winner_pda, accounts)?;
+  
 
   transfer_from_pda(game_account, platform_account, platform_fee)?;
 
@@ -205,12 +223,12 @@ pub fn end_game<'a, 'b: 'a>(
     .ok_or(BiddingError::InsufficientFunds)?;
 
   transfer_from_pda(game_account, winner_account, amount)?;
-  
+ 
   let mut player_state =  deserialize_player_state(&winner_account.data.borrow())?;
   player_state.safe = true; 
   player_state.royalty_earned += amount; 
   player_state.serialize(&mut &mut winner_account.data.borrow_mut()[..])?;
-
+  
   game_state.game_ended = true;
   game_state.serialize(&mut &mut game_account.data.borrow_mut()[..])?;
 
@@ -228,13 +246,14 @@ fn cal_royalties<'a, 'b: 'a>(
 ) -> ProgramResult {
   let eligible_bidders = &bid_history[0..bid_history.len() - 5];
   let total_bidders: usize = eligible_bidders.len();
-
+ 
   let mut total_weight = 0;
   let mut total_bid_amount = 0;
   for (i, bid) in eligible_bidders.iter().enumerate() {
       total_weight += total_bidders as u64 - i as u64; 
       total_bid_amount += bid.amount; 
   }
+ 
   let mut remaining_royalty = royalty_amount;
   for (i, bid) in eligible_bidders.iter().enumerate() {
     let weight = total_bidders as u64 - i as u64;
@@ -254,6 +273,7 @@ fn cal_royalties<'a, 'b: 'a>(
     player_state.serialize(&mut &mut player_account.data.borrow_mut()[..])?;
     remaining_royalty = remaining_royalty.saturating_sub(royalty_share);
   }
+ 
   Ok(())
 }
 
