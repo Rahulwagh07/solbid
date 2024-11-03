@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { Connection, Transaction, LAMPORTS_PER_SOL, TransactionInstruction } from '@solana/web3.js'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { useToast } from '@/hooks/use-toast'
+import { parseTransactionError } from '@/lib/parse-error'
 
 type TransactionState = 'idle' | 'preparing' | 'awaitingApproval' | 'submitting' | 'confirming' | 'success' | 'error'
 
@@ -50,7 +51,7 @@ export function useTransaction(connection: Connection) {
       const transaction = new Transaction().add(...instructions)
       transaction.recentBlockhash = latestBlockhash.blockhash
       transaction.feePayer = publicKey
-
+       
       const balance = await connection.getBalance(publicKey)
       if (balance < (totalCost || 0)) {
         throw new Error(`Insufficient balance. You need at least ${(totalCost || 0) / LAMPORTS_PER_SOL} SOL`)
@@ -68,7 +69,7 @@ export function useTransaction(connection: Connection) {
         lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
         signature: txid,
       }, 'confirmed')
-
+       
       if (confirmation.value.err) {
         throw new Error(`Transaction failed: ${confirmation.value.err.toString()}`)
       }
@@ -83,9 +84,10 @@ export function useTransaction(connection: Connection) {
       return txid
     } catch (error) {
       setStatus({ state: 'error', message: STATUS_MESSAGES.error })
+      const message = parseTransactionError(error);
       toast({
         title: "Transaction Failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        description: message,
         variant: "destructive",
       })
     }
