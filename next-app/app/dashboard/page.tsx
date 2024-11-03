@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader} from "@/components/ui/card"
-import { Wallet, ArrowUpRight, Trophy} from "lucide-react"
+import { DollarSign, CheckCheck, Crown, Gem} from "lucide-react"
 import Sidebar from '@/components/dashboard/Sidebar'
 import LiveGames from '@/components/dashboard/LiveGames'
 import Transactions from '@/components/dashboard/Transactions'
@@ -55,10 +55,10 @@ export default function Dashboard() {
               <>
                 <h2 className="text-lg sm:text-3xl font-bold mb-6">Hello, {session?.data?.user.name}</h2>
                 <div className="grid gap-6 grid-cols-1">
-                  <CardItem title="Total Bids Placed by you" value={data?.metrics?.totalBids?? 0} icon={<Wallet className="h-4 w-4 text-slate-400" />} />
-                  <CardItem title="Total Amount" value={`$${data?.metrics?.totalAmount?? 0}`} icon={<Trophy className="h-4 w-4 text-slate-400" />} />
-                  <CardItem title="Your Highest Bid" value={`$${data?.metrics?.highestBid?? 0}`} icon={<ArrowUpRight className="h-4 w-4 text-slate-400" />} />
-                  <CardItem title="Total Royalties Earned" value={`$${data?.metrics?.totalRoyalties?? 0}`} icon={<Trophy className="h-4 w-4 text-slate-400" />} />
+                  <CardItem title="Total Bids Placed by you" value={data?.metrics?.totalBids?? 0} icon={<CheckCheck className="h-6 w-6 text-blue-500" />} />
+                  <CardItem title="Total Amount" value={`$${data?.metrics?.totalAmount?? 0}`} icon={<DollarSign className="h-6 w-6 text-green-500" />} />
+                  <CardItem title="Your Highest Bid" value={`$${data?.metrics?.highestBid?? 0}`} icon={<Crown className="h-6 w-6 text-yellow-500" />} />
+                  <CardItem title="Total Royalties Earned" value={`$${data?.metrics?.totalRoyalties?? 0}`} icon={<Gem className="h-6 w-6 text-purple-500" />} />
                 </div>
               </>
             )}

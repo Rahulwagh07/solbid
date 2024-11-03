@@ -69,7 +69,7 @@ export async function POST(req: Request) {
       },
     });
 
-    await prisma.game.findUnique({
+    const gameData = await prisma.game.findUnique({
       where:{
         id: updatedGame.id,
       },
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
       }
     })
 
-    return NextResponse.json({ message: 'Game updated successfully'}, { status: 200 });
+    return NextResponse.json({ message: 'Game updated successfully', gameData}, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
@@ -209,15 +209,16 @@ export async function PUT(req: Request) {
       },
     });
 
-    const winnerId = player.id - 1;
-    await prisma.player.update({
-      where:{
-        id: winnerId,
+    const winnerBidCount = bidCount - 1;
+    await prisma.player.updateMany({
+      where: {
+        bidCount: winnerBidCount,
+        gameId: gameId,
       },
       data: {
         role: PlayerRole.WINNER,
-      }
-    })
+      },
+    });
 
     await prisma.bid.create({
       data: {

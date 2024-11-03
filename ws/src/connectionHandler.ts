@@ -2,13 +2,27 @@ import { WebSocket } from "ws";
 import GameManager from "./gameManager";
 import { sendError } from "./utils";
 import { createGame } from "./createGame";
+import { verifyToken } from "./verify";
 
 export function handleConnection(ws: WebSocket) {
   const gameManager = GameManager.getInstance();
   gameManager.addClient(ws);
 
-  ws.on("message", (raw: Buffer) => { //raw- message
+  ws.on("message", async  (raw: Buffer) => { //raw- message
     try {
+      const { data } = JSON.parse(raw.toString());
+      const token = data?.token;
+      if(!token){
+        sendError(ws, `Token not found`);
+        ws.close;
+        return;
+      }
+      const authroized = await verifyToken(ws, token)
+      if(!authroized){
+        sendError(ws, `Unauthorized`);
+        ws.close();  
+        return;
+      }
       handleMessage(ws, raw.toString());
     } catch (error) {
       sendError(ws, "Failed to process message");

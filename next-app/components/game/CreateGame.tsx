@@ -135,6 +135,7 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
               onChange={(e) => setInitialBidAmount(e.target.value)}
               placeholder="Enter initial bid amount"
               required
+              min={2}
             />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>

@@ -92,7 +92,7 @@ export default function PlaceBid({
           if (res.status === 200) {
             toast({
               title: "Game Ended",
-              description: "You just came after the winner.",
+              description: "You finished after the winner. No amount has been deducted.",
               variant: "default",
             });
             const gameData: GameData = res.data.gameData;
