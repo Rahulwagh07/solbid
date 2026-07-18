@@ -1,7 +1,16 @@
-<h3 align="center">A decentralized bidding game on Solana where every bid earns you royalties, and the last bidder wins the prize.</h3>
-<p align="center">
-  <img src="assets/banner.png" alt="SolBid" width="800" />
-</p>
+<div align="center">
+    <h1>Solbid: Competitive bidding game on solana</h1>
+    <p>A decentralized bidding game on solana where every bid earns you royalties, and the last bidder wins the prize.</p>
+    <h2>
+        <a href="https://solbid.rsw.wtf">https://solbid.rsw.wtf</a>
+    </h2>
+
+<div align="center">
+  <a href="https://solbid.rsw.wtf">
+    <img src="assets/banner.png" alt="SolBid" width="800" />
+  </a>
+</div>
+</div>
 
 ## How It Works
 
