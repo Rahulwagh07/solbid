@@ -1,4 +1,3 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { PastGame } from "@/types/dashboard";
 import Link from "next/link";
 import DataNotFoundCard from "./DataNotFoundCard";
@@ -7,37 +6,73 @@ import { HistoryIcon } from "lucide-react";
 export default function PastGames({ games }: { games: PastGame[] }) {
   return (
     <>
-      <h2 className="text-lg sm:text-3xl font-bold mb-6">
+      <h2 className="font-display font-bold text-text text-xl sm:text-2xl mb-6">
         Games You Were In (Ended)
       </h2>
       {games.length > 0 ? (
-        <ScrollArea className="h-[calc(100vh-8rem)]  sm:h-[calc(100vh-12rem)] pr-4 pb-3">
+        <div className="pb-3">
           {games.map((game) => (
             <div
               key={game.gameId}
-              className="flex flex-col gap-4 sm:gap-0  text-sm sm:flex-row items-start sm:items-center justify-between p-4 mb-4  border border-slate-700/90 bg-slate-700/50 rounded-lg shadow"
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-surface-2/30 backdrop-blur-md rounded-2xl p-5 mb-4 hover:bg-surface-2/60 transition-colors duration-300 group"
             >
-              <div>
-                <p className="font-medium">Game #{game.gameId}</p>
-                <p className="text-sm text-slate-400">
-                  Ended: {new Date(game.endTime).toLocaleString()}
-                </p>
+              <div className="flex flex-col gap-2 w-full sm:w-auto overflow-hidden">
+                <div className="flex items-center gap-3">
+                  <span className="h-2 w-2 rounded-full bg-muted" />
+                  <p className="font-display text-2xl font-black tracking-tighter text-text truncate">
+                    Game #{game.gameId}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <p className="text-xs font-mono font-bold uppercase tracking-widest text-muted">
+                    Ended:{" "}
+                    <span className="text-text">
+                      {new Date(game.endTime).toLocaleString()}
+                    </span>
+                  </p>
+                </div>
               </div>
-              <div className="sm:text-right">
-                <p className="font-medium">Total Bid: ${game.totalAmount}</p>
-                <p className="text-sm text-slate-400">
-                  Royalty Earned: ${game.totalRoyalty}
+              <div className="flex flex-col sm:text-right mt-6 sm:mt-0 w-full sm:w-auto">
+                <p className="text-xs font-mono font-bold uppercase tracking-widest text-muted mb-1">
+                  Total Royalty
                 </p>
+                <p className="font-display text-3xl font-black text-text">
+                  <span className="opacity-50 mr-0.5">$</span>
+                  {game.totalRoyalty}
+                </p>
+                <div className="flex flex-col sm:items-end gap-1 mt-2">
+                  <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-muted">
+                    Total Bid:{" "}
+                    <span className="text-text">${game.totalAmount}</span>
+                  </p>
+                </div>
               </div>
-              <Link
-                href={`/game/${game.gameId}`}
-                className="bg-white text-black py-1.5 px-4 rounded-md border"
-              >
-                View
-              </Link>
+              <div className="mt-6 sm:mt-0 w-full sm:w-auto sm:ml-8">
+                <Link
+                  href={`/game/${game.gameId}`}
+                  className="inline-flex w-full sm:w-12 sm:h-12 h-10 items-center justify-center rounded-full bg-black text-white hover:scale-105 active:scale-95 transition-transform"
+                >
+                  <span className="sm:hidden font-bold text-xs uppercase tracking-widest mr-2">
+                    View Game
+                  </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           ))}
-        </ScrollArea>
+        </div>
       ) : (
         <DataNotFoundCard
           icon={HistoryIcon}

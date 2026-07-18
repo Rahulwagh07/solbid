@@ -1,26 +1,25 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "../styles/globals.css"
+import "../styles/globals.css";
 import { Providers } from "@/components/provider";
 import Appbar from "@/components/common/Appbar";
 import { Suspense } from "react";
-import "../styles/wallet.css"
+import "../styles/wallet.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
 export const metadata: Metadata = {
-  title: "Solbid",
-  description: "An Online, Competitive Bidding Game",
+  title: "SolBid - Competitive Bidding Game on Solana",
+  description:
+    "An online, competitive bidding game. Stake your claim, earn royalties, be the last to win. Built on Solana.",
+  openGraph: {
+    title: "SolBid - Competitive Bidding on Solana",
+    description: "Stake your claim, earn royalties, be the last to win.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SolBid - Competitive Bidding on Solana",
+    description: "Stake your claim, earn royalties, be the last to win.",
+  },
 };
 
 export default function RootLayout({
@@ -29,17 +28,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >  
+    <html lang="en" className="h-full">
+      <head></head>
+      <body className="antialiased bg-background text-text min-h-full">
         <Providers>
           <Suspense fallback={<></>}>
-          <Appbar/>
+            <Appbar />
           </Suspense>
-          {children} 
+          {children}
         </Providers>
-        <Toaster/>
+        <Toaster />
       </body>
     </html>
   );

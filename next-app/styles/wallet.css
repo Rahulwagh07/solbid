@@ -1,5 +1,5 @@
- 
-.wallet-adapter-button, .wallet-adapter-button-trigger{
+.wallet-adapter-button,
+.wallet-adapter-button-trigger {
   border: 1px solid #334155 !important;
   color: white;
   background-color: #1e293b;

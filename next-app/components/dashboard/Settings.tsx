@@ -5,17 +5,8 @@ import { useSession } from "next-auth/react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Loader, Upload } from "lucide-react";
+import { Loader, Upload, User } from "lucide-react";
 
 interface UpdateSessionData {
   user: {
@@ -34,7 +25,7 @@ export default function ProfileUpdate() {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasUnsaved, setHasUnsaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -51,12 +42,8 @@ export default function ProfileUpdate() {
   useEffect(() => {
     const hasChanges =
       username !== initialUsername || imagePreview !== initialImage;
-
-    if (initialImage !== session?.user.image) {
-      setHasUnsavedChanges(false);
-    } else {
-      setHasUnsavedChanges(hasChanges);
-    }
+    setHasUnsaved(initialImage !== session?.user.image ? false : hasChanges);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username, imagePreview, session]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,9 +51,7 @@ export default function ProfileUpdate() {
     if (file) {
       setImage(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -74,20 +59,16 @@ export default function ProfileUpdate() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-
     const formData = new FormData();
     if (image) formData.append("file", image);
     formData.append("username", username);
 
     try {
       const res = await axios.post("/api/profile", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
-
       if (res.status === 200) {
-        const updateData: UpdateSessionData = {
+        await update({
           user: {
             ...session?.user,
             id: session?.user?.id ?? "",
@@ -95,9 +76,8 @@ export default function ProfileUpdate() {
             image: res.data.url || null,
           },
           trigger: "update",
-        };
-        await update(updateData);
-        setHasUnsavedChanges(false);
+        } as UpdateSessionData);
+        setHasUnsaved(false);
         toast({
           title: "Profile updated",
           description: "Your profile has been successfully updated.",
@@ -107,45 +87,51 @@ export default function ProfileUpdate() {
       console.error("Error updating profile:", error);
       toast({
         title: "Update failed",
-        description:
-          "There was a problem updating your profile. Please try again.",
+        description: "There was a problem updating your profile.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
-      setHasUnsavedChanges(false);
+      setHasUnsaved(false);
     }
   };
 
-  const handleDiscardChanges = () => {
+  const handleDiscard = () => {
     setUsername(session?.user.name || "");
     setImagePreview(session?.user.image || null);
     setImage(null);
-    setHasUnsavedChanges(false);
+    setHasUnsaved(false);
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto bg-slate-700/50 border-[0.5px] border-slate-600">
-      <CardHeader>
-        <CardTitle>Update Profile</CardTitle>
-      </CardHeader>
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col items-center space-y-2">
-            <Avatar className="w-24 h-24">
+    <div className="max-w-xl">
+      <div className="mb-8">
+        <h2 className="font-display font-bold text-text text-xl sm:text-2xl">
+          Settings
+        </h2>
+        <p className="mt-1 text-sm font-mono text-muted">
+          Manage your profile details
+        </p>
+      </div>
+
+      <div className="bg-surface border border-border rounded-xl shadow-sm p-4 sm:p-6 mb-3 transition-all duration-200">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Avatar */}
+          <div className="flex flex-col items-center gap-4">
+            <Avatar className="w-20 h-20 border border-border rounded-xl">
               <AvatarImage src={imagePreview || undefined} alt={username} />
-              <AvatarFallback>
-                {username.charAt(0).toUpperCase()}
+              <AvatarFallback className="bg-surface rounded-xl">
+                <User className="h-8 w-8 text-muted" />
               </AvatarFallback>
             </Avatar>
-            <Button
+            <button
               type="button"
-              size="sm"
               onClick={() => fileInputRef.current?.click()}
+              className="inline-flex h-9 items-center justify-center gap-2 border border-border rounded-xl bg-black text-white px-4 font-bold text-xs uppercase tracking-widest hover:opacity-80 transition-colors"
             >
-              <Upload className="mr-2 h-4 w-4" /> Upload new picture
-            </Button>
-            <Input
+              <Upload className="h-3.5 w-3.5" /> Upload new picture
+            </button>
+            <input
               type="file"
               ref={fileInputRef}
               className="hidden"
@@ -153,45 +139,47 @@ export default function ProfileUpdate() {
               onChange={handleImageChange}
             />
           </div>
+
+          {/* Username */}
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <label
+              htmlFor="username"
+              className="font-display font-bold text-text block mb-1"
+            >
+              Username
+            </label>
             <Input
-              className="bg-slate-700/50 border-[0.5px] border-slate-600"
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
               required
+              className="w-full h-11 px-3 text-sm font-mono text-text bg-white border border-border rounded-xl placeholder:text-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-highlight transition-colors truncate"
             />
           </div>
-        </CardContent>
-        <CardFooter className="flex flex-col sm:flex-row items-center gap-2">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading || !hasUnsavedChanges}
-          >
-            {isLoading ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Updating...
-              </>
-            ) : (
-              "Save Changes"
-            )}
-          </Button>
-          {hasUnsavedChanges && (
-            <Button
-              type="button"
-              variant={"destructive"}
-              className="w-full"
-              onClick={handleDiscardChanges}
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={isLoading || !hasUnsaved}
+              className="w-full sm:w-auto sm:flex-1 inline-flex h-11 items-center justify-center gap-2 bg-text text-surface font-bold uppercase tracking-widest text-xs rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Discard Changes
-            </Button>
-          )}
-        </CardFooter>
-      </form>
-    </Card>
+              {isLoading && <Loader className="h-4 w-4 animate-spin" />}
+              {isLoading ? "Saving..." : "Save Changes"}
+            </button>
+            {hasUnsaved && (
+              <button
+                type="button"
+                onClick={handleDiscard}
+                className="w-full sm:w-auto sm:flex-1 inline-flex h-11 items-center justify-center gap-2 border border-border bg-surface font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-surface-2 transition-colors text-text"
+              >
+                Discard
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -13,15 +13,17 @@ export default function SidebarItem({
 }: SidebarItemProps) {
   return (
     <button
-      className={`flex items-center space-x-2 w-full p-2 rounded-lg transition-colors duration-200 ${
-        active ? "bg-slate-700" : "hover:bg-slate-700 hover:text-white"
-      }  `}
+      className={`flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors duration-200 ${
+        active
+          ? "bg-accent/10 text-accent font-medium"
+          : "text-muted hover:bg-surface-2 hover:text-text"
+      }`}
       onClick={onClick}
       aria-current={active ? "page" : undefined}
     >
       <span
         className={`transition-colors duration-200 ${
-          active && "text-blue-500"
+          active ? "text-accent" : "text-muted"
         }`}
       >
         {icon}

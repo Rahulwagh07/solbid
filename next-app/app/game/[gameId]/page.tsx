@@ -1,7 +1,7 @@
 "use client";
 import { BidHistory } from "@/components/game/BidHistory";
 import { GameStatistics } from "@/components/game/GameStatistics.";
-import { LoadingSkeleton } from "@/components/skelton/loading-skelton";
+import CustomLoader from "@/components/common/Loader";
 import { GameData } from "@/types/game";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -42,10 +42,10 @@ function Page({ params }: { params: { gameId: string } }) {
   }, [gameId, status, router]);
 
   return (
-    <div className="bg-slate-800 lg:p-12 min-h-screen flex justify-center">
-      <div className="w-full xl:w-10/12 mt-16 px-4 py-8 ">
+    <div className="bg-background pt-24 lg:p-12 min-h-screen flex justify-center">
+      <div className="w-full max-w-7xl mt-16 px-4 py-8">
         {loading || !gameData ? (
-          <LoadingSkeleton />
+          <CustomLoader styles="min-h-[50vh] w-full" />
         ) : (
           <>
             <GameStatistics gameData={gameData} />

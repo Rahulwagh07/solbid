@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Dialog,
@@ -19,7 +18,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { CONNECTION } from "@/lib/constant";
 import { useToast } from "@/hooks/use-toast";
 import { useTransaction } from "@/hooks/use-tranaction";
-import { Loader } from "lucide-react";
+import { Loader, Plus } from "lucide-react";
 
 interface CreateGameProps {
   onCreateGame: (gameData: GameData) => void;
@@ -37,20 +36,22 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     if (!publicKey) {
       toast({
-        title: "Wallet Connection Required",
-        description: "Please connect your wallet first",
+        title: "Wallet Required",
+        description: "Please connect your wallet first.",
         variant: "destructive",
       });
       setLoading(false);
       return;
     }
+
     const bidAmount = parseFloat(initialBidAmount);
     if (isNaN(bidAmount) || bidAmount <= 0) {
       toast({
-        title: "Invalid Bid Amount",
-        description: "Please enter a valid bid amount",
+        title: "Invalid Amount",
+        description: "Please enter a valid bid amount.",
         variant: "destructive",
       });
       setLoading(false);
@@ -60,10 +61,10 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
     try {
       const gameId: number = await fetchCurrentGameId();
       let pdas = { gamePda: "", playerPda: "", bidPda: "" };
+
       const txId = await execute(async () => {
         const { instructions, totalCost, gamePda, playerPda, bidPda } =
           await createGame(publicKey, gameId, bidAmount);
-
         pdas = {
           gamePda: gamePda.toString(),
           playerPda: playerPda.toString(),
@@ -74,27 +75,23 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
 
       if (txId) {
         const gameData = {
-          gameId: gameId,
+          gameId,
           initialBidAmount: bidAmount,
           creatorPublicKey: publicKey.toString(),
-          gamePda: pdas.gamePda,
-          playerPda: pdas.playerPda,
-          bidPda: pdas.bidPda,
-          txId: txId,
+          ...pdas,
+          txId,
         };
-
         const res = await axios.post("/api/game", gameData);
-        const createdGameData: GameData = res.data.gameData;
-
         if (res.status === 200) {
-          sendMessage("create-game", createdGameData);
-          onCreateGame(createdGameData);
+          const created: GameData = res.data.gameData;
+          sendMessage("create-game", created);
+          onCreateGame(created);
         }
         setIsOpen(false);
       }
-    } catch (error) {
+    } catch (err) {
       resetState();
-      console.error("Failed to create game:", error);
+      console.error("Failed to create game:", err);
     } finally {
       resetState();
     }
@@ -107,41 +104,64 @@ export default function CreateGame({ onCreateGame }: CreateGameProps) {
     resetStatus();
   };
 
-  const handleModalClose = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) resetState();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleModalClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(o) => {
+        setIsOpen(o);
+        if (!o) resetState();
+      }}
+    >
       <DialogTrigger asChild>
-        <Button>Create Game</Button>
+        <button
+          id="create-game-btn"
+          className="btn-press inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-accent px-6 font-semibold text-white shadow-accent hover:bg-accent-hover"
+        >
+          <Plus className="h-4 w-4" />
+          New Game
+        </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-gray-800 border-[0.5px] border-slate-600">
-        <DialogHeader>
-          <DialogTitle>Create New Game</DialogTitle>
+
+      <DialogContent className="sm:max-w-[400px] surface p-6">
+        <DialogHeader className="mb-4">
+          <DialogTitle className="font-display text-xl font-bold text-text">
+            Create New Game
+          </DialogTitle>
+          <p className="mt-1 text-xs text-muted font-mono">
+            Set the initial bid. Each subsequent bid must double the current
+            highest.
+          </p>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label htmlFor="initialBidAmount" className="text-sm font-medium">
+            <label htmlFor="initialBidAmount" className="label-caps">
               Initial Bid Amount (USDC)
             </label>
             <Input
-              className="bg-gray-800 border-slate-700"
               id="initialBidAmount"
               type="number"
               step="0.01"
+              min={2}
               value={initialBidAmount}
               onChange={(e) => setInitialBidAmount(e.target.value)}
-              placeholder="Enter initial bid amount"
+              placeholder="e.g. 5.00"
               required
-              min={2}
+              className="w-full h-11 px-3 text-sm font-mono text-text bg-white border border-border rounded-xl placeholder:text-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-highlight transition-colors"
             />
+            <p className="text-[11px] font-mono text-muted">
+              Minimum: $2.00 USDC
+            </p>
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-press w-full inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-accent px-6 font-semibold text-white shadow-accent hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading && <Loader className="h-4 w-4 animate-spin" />}
             {status.state === "idle" ? "Create Game" : status.message}
-          </Button>
+          </button>
         </form>
       </DialogContent>
     </Dialog>

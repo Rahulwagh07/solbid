@@ -1,25 +1,36 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import { gameSchema } from '@/schema/game-schema';
+import { NextResponse } from "next/server";
+import prisma from "@/lib/db";
+import { gameSchema } from "@/schema/game-schema";
 
 export async function POST(req: Request) {
   try {
-    const userId = req.headers.get('userId');
+    const userId = req.headers.get("userId");
     if (!userId) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
     const body = await req.json();
     const result = gameSchema.safeParse(body);
 
     if (!result.success) {
-      return NextResponse.json({
-        message: 'Validation failed',
-        errors: result.error.errors
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          message: "Validation failed",
+          errors: result.error.errors,
+        },
+        { status: 400 },
+      );
     }
 
-    const { gameId, initialBidAmount, creatorPublicKey, gamePda, playerPda, bidPda, txId } = result.data;
-  
+    const {
+      gameId,
+      initialBidAmount,
+      creatorPublicKey,
+      gamePda,
+      playerPda,
+      bidPda,
+      txId,
+    } = result.data;
+
     const game = await prisma.game.create({
       data: {
         gameId: gameId.toString(),
@@ -30,10 +41,10 @@ export async function POST(req: Request) {
         totalBids: 1,
         lastBidderId: bidPda,
         prizePool: parseInt(initialBidAmount.toString()),
-        platformFeePercent: 10,  
+        platformFeePercent: 10,
       },
     });
- 
+
     const player = await prisma.player.create({
       data: {
         playerPubkey: creatorPublicKey,
@@ -44,7 +55,7 @@ export async function POST(req: Request) {
         userId: parseInt(userId),
       },
     });
- 
+
     await prisma.bid.create({
       data: {
         pda: bidPda,
@@ -54,86 +65,101 @@ export async function POST(req: Request) {
         txId: txId,
       },
     });
- 
+
     await prisma.gameId.update({
       where: { id: 1 },
       data: {
         currGameId: {
           increment: 1,
         },
-      }
+      },
     });
 
     const gameData = await prisma.game.findUnique({
-      where:{
+      where: {
         id: game.id,
       },
       include: {
         players: {
           include: {
-            bid: true,   
-            user:{
+            bid: true,
+            user: {
               omit: {
                 email: true,
                 password: true,
                 provider: true,
               },
-            }
+            },
           },
         },
       },
       omit: {
         platformFeePercent: true,
-      }
-    })
-    
-    return NextResponse.json({ message: 'Game created successfully', gameData}, { status: 200 });
+      },
+    });
+
+    return NextResponse.json(
+      { message: "Game created successfully", gameData },
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
 
- 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const id = url.searchParams.get('id');
+  const id = url.searchParams.get("id");
 
   try {
     if (id) {
       const gameData = await prisma.game.findUnique({
-        where: { id: parseInt(id) },  
+        where: { id: parseInt(id) },
         include: {
           players: {
             include: {
-              bid: true,   
-              user:{
+              bid: true,
+              user: {
                 omit: {
                   email: true,
                   password: true,
                 },
-              }
+              },
             },
           },
         },
       });
 
       if (!gameData) {
-        return NextResponse.json({ message: 'Game not found' }, { status: 404 });
+        return NextResponse.json(
+          { message: "Game not found" },
+          { status: 404 },
+        );
       }
 
-      return NextResponse.json({ game: {gameData} }, { status: 200 });
-
+      return NextResponse.json({ game: { gameData } }, { status: 200 });
     } else {
       const games = await prisma.game.findMany();
       if (!games.length) {
-        return NextResponse.json({ message: 'No games found' }, { status: 404 });
+        return NextResponse.json(
+          { message: "No games found" },
+          { status: 404 },
+        );
       }
-      return NextResponse.json({ message: 'Games data fetched', games }, { status: 200 });
+      return NextResponse.json(
+        { message: "Games data fetched", games },
+        { status: 200 },
+      );
     }
   } catch (error) {
-    console.error('Error fetching game data:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    console.error("Error fetching game data:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
-

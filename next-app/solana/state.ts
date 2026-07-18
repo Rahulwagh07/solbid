@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
-import * as borsh from '@coral-xyz/borsh';
+import * as borsh from "@coral-xyz/borsh";
 
 export class GameState {
   game_id: number;
@@ -18,22 +18,22 @@ export class GameState {
     this.highest_bid = fields.highest_bid || 0;
     this.last_bid_time = fields.last_bid_time || 0;
     this.total_bids = fields.total_bids || 0;
-    this.last_bidder = fields.last_bidder || new PublicKey(0);  
+    this.last_bidder = fields.last_bidder || new PublicKey(0);
     this.prize_pool = fields.prize_pool || 0;
     this.platform_fee_percentage = fields.platform_fee_percentage || 0;
     this.game_ended = fields.game_ended || false;
   }
 
   static borshAccountSchema = borsh.struct([
-    borsh.u64('game_id'),
-    borsh.u64('initial_bid_amount'),
-    borsh.u64('highest_bid'),
-    borsh.u64('last_bid_time'),
-    borsh.u64('total_bids'),
-    borsh.publicKey('last_bidder'),
-    borsh.u64('prize_pool'),
-    borsh.u64('platform_fee_percentage'),
-    borsh.bool('game_ended'),  
+    borsh.u64("game_id"),
+    borsh.u64("initial_bid_amount"),
+    borsh.u64("highest_bid"),
+    borsh.u64("last_bid_time"),
+    borsh.u64("total_bids"),
+    borsh.publicKey("last_bidder"),
+    borsh.u64("prize_pool"),
+    borsh.u64("platform_fee_percentage"),
+    borsh.bool("game_ended"),
   ]);
 
   static deserialize(buffer?: Buffer): GameState | null {
@@ -42,24 +42,32 @@ export class GameState {
     }
 
     try {
-      const { game_id, initial_bid_amount, highest_bid, last_bid_time, 
-              total_bids, last_bidder, prize_pool, platform_fee_percentage, game_ended 
-            } = this.borshAccountSchema.decode(buffer);
+      const {
+        game_id,
+        initial_bid_amount,
+        highest_bid,
+        last_bid_time,
+        total_bids,
+        last_bidder,
+        prize_pool,
+        platform_fee_percentage,
+        game_ended,
+      } = this.borshAccountSchema.decode(buffer);
 
-        return new GameState({
-          game_id,
-          initial_bid_amount,
-          highest_bid,
-          last_bid_time,
-          total_bids,
-          last_bidder,
-          prize_pool,
-          platform_fee_percentage,
-          game_ended,
-        });
+      return new GameState({
+        game_id,
+        initial_bid_amount,
+        highest_bid,
+        last_bid_time,
+        total_bids,
+        last_bidder,
+        prize_pool,
+        platform_fee_percentage,
+        game_ended,
+      });
     } catch (error) {
-        console.error("Game deserialization error:", error);
-        return null;
+      console.error("Game deserialization error:", error);
+      return null;
     }
   }
 }
@@ -78,10 +86,10 @@ export class PlayerState {
   }
 
   static borshAccountSchema = borsh.struct([
-    borsh.u64('total_bid_amount'),
-    borsh.bool('safe'),
-    borsh.u64('royalty_earned'),
-    borsh.u64('bid_count'),
+    borsh.u64("total_bid_amount"),
+    borsh.bool("safe"),
+    borsh.u64("royalty_earned"),
+    borsh.u64("bid_count"),
   ]);
 
   static deserialize(buffer?: Buffer): PlayerState | null {

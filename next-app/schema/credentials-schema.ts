@@ -30,15 +30,17 @@ export const loginSchema = z.object({
   password: passwordSchema,
 });
 
-export const forgotPasswordSchema = z.object({
-  email: emailSchema,
-  otp: otpSchema.optional(),
-  password: passwordSchema.optional(),
-  confirmPassword: z.string().optional(),
-}).refine((data) => !data.password || data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+export const forgotPasswordSchema = z
+  .object({
+    email: emailSchema,
+    otp: otpSchema.optional(),
+    password: passwordSchema.optional(),
+    confirmPassword: z.string().optional(),
+  })
+  .refine((data) => !data.password || data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 export type SignupFormData = z.infer<typeof signupSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -46,7 +48,7 @@ export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export const validateForm = <T extends Record<string, unknown>>(
   schema: z.ZodSchema<T>,
-  data: T
+  data: T,
 ): { isValid: boolean; errors: Partial<Record<keyof T, string>> } => {
   try {
     schema.parse(data);
@@ -56,7 +58,7 @@ export const validateForm = <T extends Record<string, unknown>>(
       const errors: Partial<Record<keyof T, string>> = {};
       error.errors.forEach((err) => {
         const path = err.path[0];
-        if (typeof path === 'string' && path in data) {
+        if (typeof path === "string" && path in data) {
           errors[path as keyof T] = err.message;
         }
       });

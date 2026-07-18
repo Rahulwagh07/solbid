@@ -1,16 +1,16 @@
-import { NextAuthOptions, Session} from "next-auth";
+import { NextAuthOptions, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import bcrypt from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { signupSchema } from "@/schema/credentials-schema";
 import prisma from "@/lib/db";
- 
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ""
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -18,26 +18,30 @@ export const authOptions: NextAuthOptions = {
         email: { type: "email" },
         password: { type: "password" },
         name: { type: "text" },
-        isSignUp: { type: "text" }
+        isSignUp: { type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
           throw new Error("Email and password are required");
         }
 
-        const emailValidation = signupSchema.shape.email.safeParse(credentials.email);
+        const emailValidation = signupSchema.shape.email.safeParse(
+          credentials.email,
+        );
         if (!emailValidation.success) {
           throw new Error("Invalid email");
         }
 
-        const passwordValidation = signupSchema.shape.password.safeParse(credentials.password);
+        const passwordValidation = signupSchema.shape.password.safeParse(
+          credentials.password,
+        );
         if (!passwordValidation.success) {
           throw new Error(passwordValidation.error.issues[0].message);
         }
 
         try {
           const user = await prisma.user.findUnique({
-            where: { email: emailValidation.data }
+            where: { email: emailValidation.data },
           });
 
           if (credentials.isSignUp === "true") {
@@ -50,32 +54,40 @@ export const authOptions: NextAuthOptions = {
               throw new Error("Name is required for sign up");
             }
 
-            const nameValidation = signupSchema.shape.name.safeParse(credentials.name);
+            const nameValidation = signupSchema.shape.name.safeParse(
+              credentials.name,
+            );
             if (!nameValidation.success) {
               throw new Error(nameValidation.error.issues[0].message);
             }
 
-            const hashedPassword = await bcrypt.hash(passwordValidation.data, 10);
+            const hashedPassword = await bcrypt.hash(
+              passwordValidation.data,
+              10,
+            );
             const newUser = await prisma.user.create({
               data: {
                 email: emailValidation.data,
                 name: nameValidation.data,
                 password: hashedPassword,
-                provider: "Credentials"
-              }
+                provider: "Credentials",
+              },
             });
             return {
               id: newUser.id.toString(),
               email: newUser.email,
               name: newUser.name,
-            }; 
+            };
           } else {
             // Sign In
             if (!user || !user.password) {
               throw new Error("404");
             }
-           
-            const passwordVerification = await bcrypt.compare(passwordValidation.data, user.password);
+
+            const passwordVerification = await bcrypt.compare(
+              passwordValidation.data,
+              user.password,
+            );
             if (!passwordVerification) {
               throw new Error("401");
             }
@@ -84,7 +96,7 @@ export const authOptions: NextAuthOptions = {
               id: user.id.toString(),
               email: user.email,
               name: user.name,
-              image:user.imageUrl,
+              image: user.imageUrl,
             };
           }
         } catch (error) {
@@ -92,14 +104,14 @@ export const authOptions: NextAuthOptions = {
           throw error;
         }
       },
-    })
+    }),
   ],
   pages: {
     signIn: "/",
   },
   secret: process.env.NEXTAUTH_SECRET ?? "secret",
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, account, trigger, user, session }) {
@@ -111,7 +123,7 @@ export const authOptions: NextAuthOptions = {
         token.updated = true;
         return token;
       }
-    
+
       if (account && user) {
         if (account.provider !== "credentials") {
           const foundUser = await prisma.user.findUnique({
@@ -126,16 +138,16 @@ export const authOptions: NextAuthOptions = {
           token.provider = "credentials";
         }
       }
-    
+
       return token;
     },
-    async session({ session, token}: { session: Session, token: JWT}) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user) {
         session.user.id = token.id;
         session.user.provider = token.provider;
         session.user.name = token.name ?? null;
         session.user.email = token.email ?? null;
-  
+
         if (token.updated) {
           const user = await prisma.user.findUnique({
             where: { email: token.email?.toString() },
@@ -144,14 +156,14 @@ export const authOptions: NextAuthOptions = {
           session.user.image = user?.imageUrl ?? session.user.image;
         }
       }
- 
+
       return session;
     },
     async signIn({ account, profile }) {
       try {
         if (account?.provider === "google" && profile?.email) {
           const user = await prisma.user.findUnique({
-            where: { email: profile.email }
+            where: { email: profile.email },
           });
 
           if (!user) {
@@ -160,7 +172,7 @@ export const authOptions: NextAuthOptions = {
                 email: profile.email,
                 name: profile.name || undefined,
                 provider: "Google",
-              }
+              },
             });
           }
         }
@@ -169,6 +181,6 @@ export const authOptions: NextAuthOptions = {
         console.error(error);
         return false;
       }
-    }
-  }
+    },
+  },
 };

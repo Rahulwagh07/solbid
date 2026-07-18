@@ -1,0 +1,7 @@
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  bigint-buffer: true
+  bufferutil: true
+  prisma: true
+  utf-8-validate: true

@@ -1,16 +1,11 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 interface SkeletonLoaderProps {
-  className?: string
+  className?: string;
 }
 
 export function SkeletonLoader({ className }: SkeletonLoaderProps) {
   return (
-    <div
-      className={cn(
-        "animate-pulse rounded-md bg-slate-700/50",
-        className
-      )}
-    />
-  )
+    <div className={cn("animate-pulse rounded-md bg-surface-2", className)} />
+  );
 }
