@@ -67,7 +67,7 @@ export function InteractiveSimulation() {
                 key={bids}
                 initial={{ scale: 1.5, color: "#4e88bd" }}
                 animate={{ scale: 1, color: "var(--color-text)" }}
-                className="font-mono text-5xl font-black"
+                className="font-mono text-3xl sm:text-5xl font-black"
               >
                 {bids}
               </motion.p>
@@ -77,7 +77,7 @@ export function InteractiveSimulation() {
                 Time Remaining
               </p>
               <p
-                className={`font-mono text-6xl font-black ${timer <= 3 ? "text-error animate-pulse" : "text-text"}`}
+                className={`font-mono text-4xl sm:text-6xl font-black ${timer <= 3 ? "text-error animate-pulse" : "text-text"}`}
               >
                 00:0{timer}
               </p>
@@ -90,14 +90,14 @@ export function InteractiveSimulation() {
                 key={prizePool}
                 initial={{ y: -20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="font-display text-5xl font-black text-success"
+                className="font-display text-3xl sm:text-5xl font-black text-success truncate"
               >
                 ${prizePool.toFixed(0)}
               </motion.p>
             </div>
           </div>
 
-          <div className="bg-black text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 border border-black shadow-xl">
+          <div className="bg-black text-white rounded-2xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 border border-black shadow-xl">
             <div>
               <p className="text-sm font-bold text-white/50 uppercase tracking-widest mb-1">
                 Your Royalty Earned
@@ -106,16 +106,16 @@ export function InteractiveSimulation() {
                 key={royalty}
                 initial={{ scale: 1.1 }}
                 animate={{ scale: 1 }}
-                className="font-mono text-3xl font-black text-highlight drop-shadow-[0_0_15px_rgba(204,255,0,0.4)]"
+                className="font-mono text-xl sm:text-3xl font-black text-highlight drop-shadow-[0_0_15px_rgba(204,255,0,0.4)]"
               >
                 +${royalty.toFixed(2)}
               </motion.p>
             </div>
-            <div className="text-right">
+            <div className="sm:text-right">
               <p className="text-sm font-bold text-white/50 uppercase tracking-widest mb-1">
                 Required to Outbid
               </p>
-              <p className="font-mono text-3xl font-black text-white">
+              <p className="font-mono text-xl sm:text-3xl font-black text-white">
                 ${(currentBid * 2).toFixed(2)}
               </p>
             </div>

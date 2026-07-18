@@ -101,7 +101,7 @@ export function LiveGameCard() {
         transformPerspective: 1200,
         transformStyle: "preserve-3d",
       }}
-      className="relative rounded-[2rem] border border-border/50 bg-white/70 backdrop-blur-3xl shadow-[0_40px_80px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col p-7 h-[600px] w-[440px] cursor-default"
+      className="relative rounded-[2rem] border border-border/50 bg-white/70 backdrop-blur-3xl shadow-[0_40px_80px_rgba(0,0,0,0.12)] overflow-hidden flex flex-col p-5 sm:p-7 h-[600px] w-full max-w-[440px] cursor-default"
     >
       {/* Spotlight shimmer */}
       <motion.div
@@ -140,7 +140,7 @@ export function LiveGameCard() {
           initial={{ y: -16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className={`font-display text-6xl font-black tracking-tighter transition-colors duration-300 ${flash ? "text-highlight" : "text-text"}`}
+          className={`font-display text-4xl sm:text-6xl font-black tracking-tighter transition-colors duration-300 ${flash ? "text-highlight" : "text-text"}`}
         >
           ${prize.toLocaleString()}
         </motion.p>

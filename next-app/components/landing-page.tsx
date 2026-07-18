@@ -218,7 +218,7 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="flex-1 relative min-h-[250px] md:min-h-full bg-highlight/5 border-t md:border-t-0 md:border-l border-highlight/20 flex items-center justify-center overflow-hidden">
+              <div className="flex-1 relative min-h-[250px] md:min-h-full bg-highlight/5 border-t md:border-t-0 md:border-l border-highlight/20 hidden lg:flex items-center justify-center overflow-hidden">
                 <KineticDataCore className="absolute inset-0 w-full h-full text-highlight scale-125 origin-center opacity-80" />
                 <div className="absolute inset-0 bg-highlight/10 blur-3xl rounded-full" />
               </div>
