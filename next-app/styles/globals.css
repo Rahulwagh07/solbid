@@ -1,80 +1,532 @@
+/* ═══════════════════════════════════════════════════════
+   SOLBID DESIGN SYSTEM — Single source of truth
+   All colours, spacing, motion, and type live here.
+   Components MUST reference these tokens. No raw values.
+═══════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap");
+@import "@solana/wallet-adapter-react-ui/styles.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import '@solana/wallet-adapter-react-ui/styles.css';
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── 1. COLOUR TOKENS ──────────────────────────────── */
+:root {
+  /* Background hierarchy */
+  --color-bg: #fafaf9; /* warm off-white page bg */
+  --color-surface: #ffffff; /* cards, modals, inputs */
+  --color-surface-2: #f5f4f2; /* nested surfaces, hover states */
+
+  /* Borders */
+  --color-border: #e5e4e2; /* all borders */
+  --color-border-focus: #4f46e5; /* focus ring */
+
+  /* Text */
+  --color-text: #111110; /* primary text */
+  --color-text-muted: #6b6b6b; /* secondary, labels, captions */
+  --color-text-subtle: #a8a29e; /* placeholders, disabled */
+
+  /* Accent — Editorial styling */
+  --color-accent: #111111;
+  --color-accent-hover: #000000;
+  --color-highlight: #f97316;
+  --color-accent-light: #f4f4f5; /* tinted bg for accent elements */
+  --color-accent-text: #ffffff; /* text on accent bg */
+
+  /* Semantic */
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-error: #dc2626;
+  --color-error-bg: #fef2f2;
+  --color-warning: #d97706;
+
+  /* Shadows (light theme, warm-tinted) */
+  --shadow-xs: 0 1px 2px rgba(17, 17, 16, 0.06);
+  --shadow-sm:
+    0 1px 3px rgba(17, 17, 16, 0.08), 0 1px 2px rgba(17, 17, 16, 0.06);
+  --shadow-md:
+    0 4px 6px rgba(17, 17, 16, 0.07), 0 2px 4px rgba(17, 17, 16, 0.06);
+  --shadow-lg:
+    0 10px 15px rgba(17, 17, 16, 0.08), 0 4px 6px rgba(17, 17, 16, 0.05);
+  --shadow-xl:
+    0 20px 25px rgba(17, 17, 16, 0.09), 0 10px 10px rgba(17, 17, 16, 0.04);
+  --shadow-accent:
+    0 4px 14px rgba(124, 58, 237, 0.3), 0 1px 3px rgba(124, 58, 237, 0.18);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* ─── 2. SPACING TOKENS (8pt grid) ─────────────────── */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+}
+
+/* ─── 3. RADIUS TOKENS ──────────────────────────────── */
+:root {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}
+
+/* ─── 4. TYPOGRAPHY TOKENS ──────────────────────────── */
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  /* Sizes */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+  --text-6xl: 3.75rem; /* 60px */
+  --text-7xl: 4.5rem; /* 72px */
+
+  /* Tracking — Apple rule: tighten on large, neutral on body */
+  --tracking-display: -0.03em;
+  --tracking-heading: -0.02em;
+  --tracking-base: 0em;
+  --tracking-ui: -0.01em;
+  --tracking-caps: 0.08em; /* uppercase labels */
+
+  /* Leading */
+  --leading-tight: 1.05;
+  --leading-snug: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+}
+
+/* ─── 5. MOTION TOKENS ──────────────────────────────── */
+/* From Emil Kowalski skill — custom curves, not browser defaults */
+:root {
+  /* Easings */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); /* UI enter: starts fast */
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); /* on-screen movement */
+  --ease-spring: cubic-bezier(
+    0.34,
+    1.56,
+    0.64,
+    1
+  ); /* springy micro-interactions */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* iOS-like drawer */
+
+  /* Durations */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-moderate: 250ms;
+  --duration-slow: 350ms;
+  --duration-enter: 300ms; /* modal/drawer enter */
+  --duration-exit: 200ms; /* exit always faster than enter */
+
+  /* Stagger */
+  --stagger-delay: 40ms; /* between list items */
+}
+
+/* ─── 6. REDUCED MOTION ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
+/* ─── 7. BASE STYLES ────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    color: var(--color-text);
+    background: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-subtle);
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Remove Number Input Spinners */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* ─── 8. KEYFRAMES ──────────────────────────────────── */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Clip-path reveal — Emil clip-path animation technique */
+@keyframes clip-reveal {
+  from {
+    clip-path: inset(0 100% 0 0 round 4px);
+  }
+  to {
+    clip-path: inset(0 0% 0 0 round 4px);
+  }
+}
+
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse — for live indicators */
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+/* ─── 9. UTILITIES ──────────────────────────────────── */
+@layer utilities {
+  /* Typography */
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-tight);
+    font-weight: 700;
+  }
+
+  .label-caps {
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  /* Surfaces */
+  .surface {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Animations */
+  .animate-marquee {
+    animation: marquee 40s linear infinite;
+  }
+  .animate-fade-up {
+    animation: fade-up var(--duration-enter) var(--ease-out) forwards;
+    opacity: 0;
+  }
+  .animate-fade-in {
+    animation: fade-in var(--duration-base) var(--ease-out) forwards;
+    opacity: 0;
+  }
+  .animate-live-pulse {
+    animation: live-pulse 2s ease-in-out infinite;
+  }
+
+  /* Stagger helpers */
+  .stagger-1 {
+    animation-delay: calc(var(--stagger-delay) * 1);
+  }
+  .stagger-2 {
+    animation-delay: calc(var(--stagger-delay) * 2);
+  }
+  .stagger-3 {
+    animation-delay: calc(var(--stagger-delay) * 3);
+  }
+  .stagger-4 {
+    animation-delay: calc(var(--stagger-delay) * 4);
+  }
+  .stagger-5 {
+    animation-delay: calc(var(--stagger-delay) * 5);
+  }
+  .stagger-6 {
+    animation-delay: calc(var(--stagger-delay) * 6);
+  }
+
+  /* Button press — Emil rule: scale(0.97) on :active */
+  .btn-press {
+    transition:
+      transform var(--duration-instant) var(--ease-out),
+      box-shadow var(--duration-fast) var(--ease-out),
+      background-color var(--duration-fast) ease;
+  }
+  .btn-press:active {
+    transform: scale(0.97);
+  }
+
+  /* Hover lift — only on devices that support hover */
+  @media (hover: hover) and (pointer: fine) {
+    .hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      transition:
+        transform var(--duration-base) var(--ease-out),
+        box-shadow var(--duration-base) var(--ease-out);
+    }
+  }
+
+  /* Translucent glass — Apple material pattern */
+  .glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* Live indicator dot */
+  .live-dot::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-success);
+    animation: live-pulse 2s ease-in-out infinite;
+    margin-right: 6px;
+  }
+}
+
+/* ─── 10. SHADCN/RADIX OVERRIDES ────────────────────── */
+/* Map shadcn CSS vars to our tokens */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --background: 255 255 255;
+    --foreground: 17 17 16;
+    --card: 255 255 255;
+    --card-foreground: 17 17 16;
+    --popover: 255 255 255;
+    --popover-foreground: 17 17 16;
+    --primary: 79 70 229; /* --color-accent */
+    --primary-foreground: 255 255 255;
+    --secondary: 245 244 242;
+    --secondary-foreground: 17 17 16;
+    --muted: 245 244 242;
+    --muted-foreground: 107 107 107;
+    --accent: 238 242 255;
+    --accent-foreground: 79 70 229;
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
+    --border: 229 228 226;
+    --input: 229 228 226;
+    --ring: 79 70 229;
+    --radius: 0.625rem; /* 10px */
   }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-text;
   }
-} 
- 
+}
+
+/* Dialog enter/exit — Emil rule: scale(0.95) not scale(0) */
+[data-radix-dialog-content] {
+  animation: dialog-enter var(--duration-enter) var(--ease-out);
+}
+
+@keyframes dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Popover/dropdown — origin-aware, Emil rule */
+[data-radix-dropdown-menu-content],
+[data-radix-select-content] {
+  transform-origin: var(
+    --radix-dropdown-menu-content-transform-origin,
+    var(--radix-select-content-transform-origin, top)
+  );
+  animation: popover-enter var(--duration-fast) var(--ease-out);
+}
+
+@keyframes popover-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ─── 11. SOLANA WALLET ADAPTER OVERRIDES ───────────── */
+.wallet-adapter-button {
+  background-color: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  height: 44px !important;
+  padding: 0 16px !important;
+  transition: all var(--duration-fast) var(--ease-out) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background-color: var(--color-surface-2) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.wallet-adapter-button:not([disabled]):active {
+  transform: scale(0.97) !important;
+}
+
+.wallet-adapter-dropdown-list {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: 8px !important;
+  margin-top: 8px !important;
+}
+
+.wallet-adapter-dropdown-list-item {
+  color: var(--color-text) !important;
+  background: transparent !important;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 500 !important;
+  padding: 8px 16px !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background: var(--color-surface-2) !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--shadow-xl) !important;
+  font-family: var(--font-sans) !important;
+}
+
+.wallet-adapter-modal-title {
+  color: var(--color-text) !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: var(--color-surface-2) !important;
+  border-radius: var(--radius-full) !important;
+  color: var(--color-text-muted) !important;
+}
+
+.wallet-adapter-modal-button-close:hover {
+  color: var(--color-text) !important;
+  background: var(--color-border) !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--color-text) !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background: var(--color-surface-2) !important;
+  transform: none !important;
+}

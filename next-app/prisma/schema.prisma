@@ -13,15 +13,15 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
- 
+
 model User {
   id       Int        @id @default(autoincrement())
   email    String     @unique
-  name     String?    
+  name     String?
   password String?
   imageUrl String?
   provider String?
-  players  Player[]  
+  players  Player[]
 }
 
 model OTP {
@@ -33,46 +33,46 @@ model OTP {
 
 model Game {
   id                  Int      @id @default(autoincrement())
-  gameId              String   @unique                    
+  gameId              String   @unique
   pda                 String
-  initialBidAmount    Int                                  
-  highestBid          Int                                  
-  lastBidTime         DateTime                           
-  totalBids           Int       @default(0)          
-  lastBidderId        String                              
-  prizePool           Int                                 
-  platformFeePercent  Int                                  
-  gameEnded           Boolean   @default(false)             
+  initialBidAmount    Int
+  highestBid          Int
+  lastBidTime         DateTime
+  totalBids           Int       @default(0)
+  lastBidderId        String
+  prizePool           Int
+  platformFeePercent  Int
+  gameEnded           Boolean   @default(false)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  players             Player[]                           
+  players             Player[]
 }
 
 model Player {
   id               Int            @id @default(autoincrement())
-  playerPubkey     String                              
+  playerPubkey     String
   pda              String
-  totalBidAmount   Int                                
-  safe             Boolean        @default(false)           
-  royaltyEarned    Int            @default(0)              
-  bidCount         Int                                 
-  gameId           Int                                  
+  totalBidAmount   Int
+  safe             Boolean        @default(false)
+  royaltyEarned    Int            @default(0)
+  bidCount         Int
+  gameId           Int
   role             PlayerRole     @default(PLAYER)
-  userId           Int                                  
-  user             User           @relation(fields: [userId], references: [id]) 
-  bid              Bid?                                   
-  game             Game           @relation(fields: [gameId], references: [id]) 
+  userId           Int
+  user             User           @relation(fields: [userId], references: [id])
+  bid              Bid?
+  game             Game           @relation(fields: [gameId], references: [id])
   createdAt        DateTime       @default(now())
 }
- 
+
 model Bid {
   id           Int       @id @default(autoincrement())
   pda          String
-  amount       Int                                  
-  timestamp    DateTime                          
-  playerId     Int       @unique                          
-  player       Player    @relation(fields: [playerId], references: [id]) 
-  txId         String? 
+  amount       Int
+  timestamp    DateTime
+  playerId     Int       @unique
+  player       Player    @relation(fields: [playerId], references: [id])
+  txId         String?
   createdAt    DateTime  @default(now())
 }
 

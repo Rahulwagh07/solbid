@@ -9,10 +9,6 @@ export default function MediumScreenSidebar({
   activeView,
   setActiveView,
 }: MobileSidebarProps) {
-  const gradientStyle = {
-    background: `linear-gradient(to top, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%)`,
-  };
-
   const icons = [
     { view: "home", Icon: Home },
     { view: "transactions", Icon: ArrowLeftRight },
@@ -22,21 +18,22 @@ export default function MediumScreenSidebar({
   ];
 
   return (
-    <nav
-      style={gradientStyle}
-      className="lg:hidden fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-700"
-    >
-      <div className="flex justify-around text-white">
+    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div className="flex items-center gap-2 sm:gap-6 px-6 py-3 bg-white/70 backdrop-blur-3xl border border-border/50 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.12)]">
         {icons.map(({ view, Icon }) => (
           <button
             key={view}
-            className="p-4"
+            className={`group relative flex flex-col items-center justify-center p-3 transition-all duration-300 rounded-full ${
+              activeView === view
+                ? "text-black bg-black/5"
+                : "text-muted hover:text-text hover:bg-black/5"
+            }`}
             onClick={() => setActiveView(view)}
           >
             <Icon
               size={24}
-              className={`transition-transform duration-200 ${
-                activeView === view ? "text-blue-500 scale-110" : "text-white"
+              className={`transition-transform duration-300 ${
+                activeView === view ? "scale-110" : "group-hover:scale-110"
               }`}
             />
           </button>

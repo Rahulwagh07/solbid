@@ -20,8 +20,8 @@ export default function Sidebar({ activeView, setActiveView }: SidebarProps) {
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-slate-800/50 border-r border-slate-700">
-      <nav className="flex-1 p-4 space-y-2 text-white">
+    <aside className="hidden lg:flex flex-col w-64 bg-background">
+      <nav className="flex-1 p-4 space-y-1">
         {items.map(({ view, label, Icon }) => (
           <SidebarItem
             key={view}

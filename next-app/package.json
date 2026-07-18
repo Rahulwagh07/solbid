@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "npx prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --dir .",
+    "lint:fix": "next lint --dir . --fix && prettier --write .",
     "seed": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" prisma/seed.ts",
     "postinstall": "npx prisma generate"
   },
@@ -41,9 +42,9 @@
     "cloudinary": "^2.5.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "framer-motion": "^11.11.1",
     "jsonwebtoken": "^8.5.1",
     "lucide-react": "^0.447.0",
+    "motion": "^12.42.2",
     "next": "14.2.14",
     "next-auth": "^4.24.8",
     "next-themes": "^0.3.0",
@@ -69,10 +70,24 @@
     "@types/react-dom": "^18",
     "eslint": "^8",
     "eslint-config-next": "14.2.14",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-unused-imports": "^4.4.1",
     "postcss": "^8",
+    "prettier": "^3.9.5",
     "prisma": "^5.20.0",
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "bigint-buffer",
+      "bufferutil",
+      "prisma",
+      "utf-8-validate"
+    ]
   }
 }

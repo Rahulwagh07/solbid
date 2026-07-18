@@ -89,7 +89,7 @@ export const useSocket = () => {
           ...data,
           token: user?.token,
         },
-      })
+      }),
     );
   };
 

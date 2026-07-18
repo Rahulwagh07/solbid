@@ -1,5 +1,4 @@
 import { LucideIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 
 interface GenericCardProps {
@@ -18,20 +17,22 @@ export default function DataNotFoundCard({
   linkText,
 }: GenericCardProps) {
   return (
-    <Card className="w-full mx-auto bg-slate-700/50 border-[0.5px] border-slate-600">
-      <CardContent className="flex flex-col items-start justify-center p-6 text-center">
-        <Icon className="w-12 h-12 mb-4 text-blue-500" />
-        <h3 className="text-lg   font-semibold mb-2">{title}</h3>
-        <div className="flex gap-2 items-center">
-          <p className="text-sm text-gray-200">{description}</p>
+    <div className="w-full mx-auto surface p-8 flex flex-col items-center justify-center text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/10 mb-4">
+        <Icon className="w-6 h-6 text-accent" />
+      </div>
+      <h3 className="font-display text-lg font-bold text-text mb-2">{title}</h3>
+      <div className="flex gap-2 items-center">
+        <p className="text-sm text-muted">{description}</p>
+        {linkText && to && (
           <Link
             href={to}
-            className=" underline font-[525] text-blue-400 hover:text-blue-300 "
+            className="text-sm font-medium text-accent hover:text-accent-hover transition-colors underline-offset-4 hover:underline"
           >
             {linkText}
           </Link>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }

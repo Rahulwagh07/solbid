@@ -2,7 +2,7 @@ export interface Bid {
   id: number;
   amount: number;
   timestamp: string;
-};
+}
 
 export interface Player {
   id: number;
@@ -13,11 +13,11 @@ export interface Player {
   role: string;
   bid: Bid | null;
   user: {
-    id: number,
+    id: number;
     name: string;
     imageUrl: string | null;
   };
-};
+}
 
 export interface GameData {
   id: number;
@@ -31,4 +31,4 @@ export interface GameData {
   gameEnded: boolean;
   createdAt: string;
   players: Player[];
-};
+}

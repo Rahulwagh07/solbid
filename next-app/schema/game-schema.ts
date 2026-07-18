@@ -1,18 +1,17 @@
 import { z } from "zod";
 import bs58 from "bs58";
 
-
-const base58Validator = z
-  .string()
-  .refine((val) => {
+const base58Validator = z.string().refine(
+  (val) => {
     try {
       bs58.decode(val);
       return true;
     } catch {
       return false;
     }
-  }, { message: "Invalid base58 string" });
-
+  },
+  { message: "Invalid base58 string" },
+);
 
 export const gameSchema = z.object({
   gameId: z.number({ required_error: "Game ID is required" }).positive(),
@@ -27,23 +26,24 @@ export const gameSchema = z.object({
 });
 
 export const bidSchema = z.object({
-  gameId: z.number({ required_error: 'Game ID is required' }).positive(),
+  gameId: z.number({ required_error: "Game ID is required" }).positive(),
   bidPda: base58Validator,
-  amount: z.number({ required_error: 'Bid amount is required' }).positive({ message: 'Bid amount must be a positive number' }),
+  amount: z
+    .number({ required_error: "Bid amount is required" })
+    .positive({ message: "Bid amount must be a positive number" }),
   playerPda: base58Validator,
   creatorPublicKey: base58Validator,
-  bidCount: z.number({ required_error: 'BidCount is required' }).positive(),
+  bidCount: z.number({ required_error: "BidCount is required" }).positive(),
   txId: z.string({ required_error: "Transaction id is required" }),
   playerData: z.array(
     z.object({
-      playerId: z.number({ required_error: 'Player ID is required' }),
+      playerId: z.number({ required_error: "Player ID is required" }),
       total_bid_amount: z.number(),
       royalty_earned: z.number(),
       bid_count: z.number(),
       safe: z.boolean(),
-    })
+    }),
   ),
 });
 export type GameData = z.infer<typeof gameSchema>;
 export type BidData = z.infer<typeof bidSchema>;
-
