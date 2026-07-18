@@ -15,13 +15,14 @@ import {
 import { useSocket } from "@/context/socket-context";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "motion/react";
+import { DEMO_EMAIL, DEMO_PASSWORD } from "@/lib/constant";
 
 export default function LoginPage() {
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<LoginFormData>({
-    email: "rahulwagh3774@gmail.com",
-    password: "test@#1234",
+    email: DEMO_EMAIL,
+    password: DEMO_PASSWORD,
   });
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
   const router = useRouter();
