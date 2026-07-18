@@ -208,7 +208,7 @@ export default function LandingPage() {
             className="md:col-span-4 min-h-[350px] bg-surface-2 text-text p-0 overflow-hidden"
           >
             <div className="flex flex-col md:flex-row h-full w-full">
-              <div className="flex-1 p-8 md:p-12 flex flex-col justify-center text-left">
+              <div className="flex-1 flex flex-col justify-center text-left">
                 <h3 className="font-display text-4xl sm:text-5xl font-black tracking-tight mb-6">
                   Fully Decentralized on Solana
                 </h3>
